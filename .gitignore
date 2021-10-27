@@ -133,3 +133,4 @@ dmypy.json
 log.txt
 *.ipynb
 *.mwb
+DBconfig.py
