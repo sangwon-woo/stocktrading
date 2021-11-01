@@ -12,8 +12,9 @@ self.kiwoom.dynamicCall("CommConnect()")
 self.kiwoom.dynamicCall("GetConnectState()")
 
 ## SetInputValue()
-"TR 입력 값 설정"
-self.kiwoom.dynamicCall("SetInputValue(QString, QString)", "종목코드", code)
+"Transaction 입력 값을 서버통신 전에 입력"
+self.kiwoom.dynamicCall("SetInputValue(QString, QString)", "종목코드", '039490')
+
 
 ## CommRqData()
 "TR을 서버로 전송"
