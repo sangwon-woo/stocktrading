@@ -29,7 +29,7 @@ self.kiwoom.dynamicCall("CommRqData(QString, QString, int, QString)", "opt10001_
 
 ## CommGetData(1, 2, 3, 4, 5)
 "TR 데이터, 실시간 데이터, 체결잔고 데이터를 반환"
-self.kiwoom.dynamicCall("CommGetData(QString, QString, QString, int, QString)", trcode, "", rqname, 0, "종목명")
+item_name = self.kiwoom.dynamicCall("CommGetData(QString, QString, QString, int, QString)", trcode, "", rqname, 0, "종목명")
 
     참고! 파라미터는 다음과 같다.
     TR Data     : 1. TR명,      2. 사용안함,    3. 레코드명,    4. 반복인덱스,  5. 아이템명
@@ -38,7 +38,7 @@ self.kiwoom.dynamicCall("CommGetData(QString, QString, QString, int, QString)", 
 
 ## GetLoginInfo()
 "로그인한 사용자 정보를 반환"
-self.kiwoom.dynamicCall("GetLoginInfo(QString)", ["ACCNO"])
+account_num = self.kiwoom.dynamicCall("GetLoginInfo(QString)", ["ACCNO"]).rstrip(';')
 
     참고! 인자에 들어갈 수 있는 값은 아래와 같음
     * "ACCOUNT_CNT" : 전체 계좌 개수를 반환
@@ -81,7 +81,8 @@ def event_connect(self, err_code):
 self.kiwoom.OnReceiveTrData.connect(self.receive_trdata)
 
 def receive_trdata(self, screen_no, rqname, trcode, recordname, prev_next, data_len, err_code, msg1, msg2):
-    pass
+    if rqname == 'opt10001_req':
+        pass
 * screen_no : 화면번호
 * rqname : 사용자구분 명, CommRqData의 rqname과 매핑되는 이름
 * trcode : transaction 명, CommRqData의 trcode와 매핑되는 이름
