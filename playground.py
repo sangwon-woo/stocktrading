@@ -115,7 +115,8 @@ class Kiwoom(QAxWidget):
         opt10081을 통해 일봉 데이터 요청
         약 600개의 데이터(거래일 기준)가 반환
         """
-        
+        global api_cnt
+
         data_cnt = self._get_repeat_cnt(request_name, transaction_code)
         self.total_cnt += data_cnt
         self.present_cnt += data_cnt
@@ -136,7 +137,7 @@ class Kiwoom(QAxWidget):
             self.ohlcv['close_price'].append(int(close_price))
             self.ohlcv['volume'].append(int(volume))
             
-        print(f'{self.stock_name}({self.stock_code}) 데이터 받기 진행중')
+        print(f'{self.stock_name}({self.stock_code}) 데이터 받기 진행중 {api_cnt}')
 
 app = QApplication(sys.argv)
 kiwoom = Kiwoom()
@@ -145,7 +146,7 @@ kiwoom.comm_connect()
 code_list = kiwoom.get_code_list_by_market('10')
 code_cnt = len(code_list)
 cnt = 0
-
+api_cnt =  0
 
 
 for stock_code in code_list:
@@ -167,14 +168,16 @@ for stock_code in code_list:
     kiwoom.set_input_value('기준일자', '20211101')
     kiwoom.set_input_value('수정주가구분', 1)
     kiwoom.comm_rq_data('opt10081_request', 'opt10081', 0, '0101')
-    
+    api_cnt +=1
+
     while kiwoom.remained_data: # remained_data 값이 True일 경우 연속조회 데이터가 존재한다는 것을 의미하므로 다시 한 번 동일한 TR을 요청
         time.sleep(1)
         kiwoom.set_input_value('종목코드', stock_code)
         kiwoom.set_input_value('기준일자', '20211101')
         kiwoom.set_input_value('수정주가구분', 1)
         kiwoom.comm_rq_data('opt10081_request', 'opt10081', 2, '0101') # 연속조회에선 3번째 인자를 2로 전달
-    
+        api_cnt +=1
+
     print(f'{stock_name}({stock_code}) 데이터 받기 끝({kiwoom.present_cnt}일 데이터)')
 
     df = pd.DataFrame(kiwoom.ohlcv)
@@ -189,5 +192,6 @@ for stock_code in code_list:
     print()
 
     kiwoom.present_cnt = 0
-
+    if api_cnt == 999:
+        exit()
     time.sleep(1)
