@@ -143,7 +143,7 @@ app = QApplication(sys.argv)
 kiwoom = Kiwoom()
 kiwoom.comm_connect()
 
-code_list = kiwoom.get_code_list_by_market('10')
+code_list = kiwoom.get_code_list_by_market('0')
 code_cnt = len(code_list)
 cnt = 0
 api_cnt =  0
@@ -152,7 +152,7 @@ api_cnt =  0
 for stock_code in code_list:
     stock_name = kiwoom.get_master_code_name(stock_code)
 
-    check_list = pd.read_csv('check.csv')
+    check_list = pd.read_csv('check_kospi.csv')
 
     idx = check_list.index[check_list['stock_item_code'] == stock_code].tolist()[0]
     if check_list.iloc[idx, 2] == 1:
@@ -170,6 +170,7 @@ for stock_code in code_list:
     kiwoom.comm_rq_data('opt10081_request', 'opt10081', 0, '0101')
     api_cnt +=1
 
+
     while kiwoom.remained_data: # remained_data 값이 True일 경우 연속조회 데이터가 존재한다는 것을 의미하므로 다시 한 번 동일한 TR을 요청
         time.sleep(1)
         kiwoom.set_input_value('종목코드', stock_code)
@@ -181,17 +182,17 @@ for stock_code in code_list:
     print(f'{stock_name}({stock_code}) 데이터 받기 끝({kiwoom.present_cnt}일 데이터)')
 
     df = pd.DataFrame(kiwoom.ohlcv)
-    df.to_csv(f'./stock_data/{stock_code}.csv', index=None, encoding='utf-8')
+    df.to_csv(f'./stock_data_kospi/{stock_code}.csv', index=None, encoding='utf-8')
     print(f'{stock_name}({stock_code}) 데이터 저장 끝')
 
     check_list.iloc[idx, 2] = 1
-    check_list.to_csv('check.csv', index=None, encoding='utf-8')
+    check_list.to_csv('check_kospi.csv', index=None, encoding='utf-8')
     print('check 완료')
 
     print(f'지금까지 총 {kiwoom.total_cnt}줄의 데이터를 다운받음({cnt}/{code_cnt})')
     print()
 
     kiwoom.present_cnt = 0
-    if api_cnt == 999:
+    if api_cnt == 998:
         exit()
     time.sleep(1)

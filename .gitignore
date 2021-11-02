@@ -134,4 +134,4 @@ log.txt
 *.ipynb
 *.mwb
 DBconfig.py
-stock_data/*
+stock_data_*/*
