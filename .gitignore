@@ -135,3 +135,6 @@ log.txt
 *.mwb
 DBconfig.py
 stock_data_*/*
+*.csv
+/data/*
+Glossary.xlsx
