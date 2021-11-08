@@ -9,3 +9,45 @@
 모든 종목에 대해 위의 과정을 반복한다.
 
 '''
+import pandas as pd
+from pykiwoom.kiwoom import *
+from setting import *
+
+def get_theme_info(code, theme_dict):
+    for namecode, tickers in theme_dict.items():
+        if code in tickers:
+            return namecode[:-3], namecode[-3:]
+    return (None, None)
+
+
+
+kiwoom.CommConnect(block=True)
+
+state = kiwoom.GetConnectState()
+if state == 0:
+    print("미연결")
+elif state == 1:
+    print("연결완료")
+
+account_num = kiwoom.GetLoginInfo("ACCOUNT_CNT")        # 전체 계좌수
+accounts = kiwoom.GetLoginInfo("ACCNO")[0]                 # 전체 계좌 리스트
+user_id = kiwoom.GetLoginInfo("USER_ID")                # 사용자 ID
+user_name = kiwoom.GetLoginInfo("USER_NAME")            # 사용자명
+keyboard = kiwoom.GetLoginInfo("KEY_BSECGB")            # 키보드보안 해지여부
+firewall = kiwoom.GetLoginInfo("FIREW_SECGB")           # 방화벽 설정 여부
+
+print(f'{user_name}의 {accounts}계좌로 접속')
+
+kospi_code_list = kiwoom.GetCodeListByMarket('0')
+kosdaq_code_list = kiwoom.GetCodeListByMarket('10')
+# etf = kiwoom.GetCodeListByMarket('8')
+
+group = kiwoom.GetThemeGroupList(1)
+temp = {}
+for theme_name, theme_code in group.items():
+    temp[theme_name +theme_code] = kiwoom.GetThemeGroupCode(theme_code)
+
+lastest_checklist = pd.read_csv(CSV_DAILY_CHECKLIST, index=None, encoding='utf-8')
+lastest_checklist.to_csv(CSV_LASTEST_CHECKLIST, encoding='utf-8')
+
+
