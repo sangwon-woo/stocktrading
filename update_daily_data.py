@@ -20,7 +20,7 @@ def get_theme_info(code, theme_dict):
     return (None, None)
 
 
-
+kiwoom = Kiwoom()
 kiwoom.CommConnect(block=True)
 
 state = kiwoom.GetConnectState()
