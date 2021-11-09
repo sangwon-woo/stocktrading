@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 PWD = os.getcwd()
-TODAY = str(datetime.today())[:10]
+TODAY = ''.join(str(datetime.today())[:10].split('-'))
 
 DIR_KOSPI_DAILY = PWD + '\\data\\kospi_daily'
 DIR_KOSDAQ_DAILY = PWD + '\\data\\kosdaq_daily'
@@ -14,11 +14,11 @@ DIR_KOSDAQ_MINUTELY = PWD + '\\data\\kosdaq_minutely'
 CSV_DAILY_CHECKLIST = PWD + '\\data\\daily_checklist.csv'
 CSV_LASTEST_CHECKLIST = PWD + f'\\data\\past_check\\daily_checklist_{TODAY}.csv'
 
-checklist_dtype ={
+CHECKLIST_DTYPE ={
 
 }
 
-tradedata_dtype = {
+TRADEDATA_DTYPE = {
     '종목코드' : 'category',
     '종목명' : 'category',
     '시가' : np.uint32,
