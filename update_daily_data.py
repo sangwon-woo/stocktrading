@@ -9,27 +9,23 @@
 모든 종목에 대해 위의 과정을 반복한다.
 
 '''
+import time
 import pandas as pd
 import numpy as np
+
 from pykiwoom.kiwoom import *
 from setting import *
+from update_checklist import *
 from datetime import datetime
-import time
 
-def get_theme_info(code, theme_dict):
-    for namecode, tickers in theme_dict.items():
-        if code in tickers:
-            return namecode[:-3], namecode[-3:]
-    return (np.nan, np.nan)
-
-def get_stock_trade_data_until_now(code, name, today, col_map, dtype):
+def get_stock_trade_data_until_now(code, name, today, col_map, dtype, next=0):
     
     recent_df = kiwoom.block_request('opt10081', 
                                     종목코드=code, 
                                     기준일자=today, 
                                     수정주가구분=1, 
-                                    output='주식일봉차트조회', 
-                                    next=0)
+                                    output='주식일봉차트조회',
+                                    next=next)
     recent_df = recent_df.rename(columns=col_map)
     recent_df['날짜'] = pd.to_datetime(recent_df['날짜'])
     recent_df['종목코드'] = code
@@ -39,7 +35,6 @@ def get_stock_trade_data_until_now(code, name, today, col_map, dtype):
     recent_df = recent_df.astype(dtype)
     
     return recent_df
-
 
 if __name__ == '__main__':
     kiwoom = Kiwoom()
@@ -60,9 +55,7 @@ if __name__ == '__main__':
 
     print(f'{user_name}의 {accounts}계좌로 접속')
 
-    kospi_code_list_until_now = kiwoom.GetCodeListByMarket('0')
-    kosdaq_code_list_until_now = kiwoom.GetCodeListByMarket('10')
-    # etf = kiwoom.GetCodeListByMarket('8')
+    update_checklist()
 
     col_map = {
         '현재가' : '종가',
@@ -71,54 +64,15 @@ if __name__ == '__main__':
     api_cnt = 0
 
 
+    today_checklist = pd.read_csv(CSV_DAILY_CHECKLIST, index=None, encoding='utf-8')
+    lastest_checklist = pd.read_csv(CSV_LASTEST_CHECKLIST, index=None, encoding='utf-8')
 
-    group = kiwoom.GetThemeGroupList(1)
-    temp = {}
-    for theme_name, theme_code in group.items():
-        temp[theme_name +theme_code] = kiwoom.GetThemeGroupCode(theme_code)
 
-    # lastest_checklist = pd.read_csv(CSV_DAILY_CHECKLIST, index=None, encoding='utf-8')
-    # lastest_checklist.to_csv(CSV_LASTEST_CHECKLIST, encoding='utf-8')
-
-    today_checklist = {'시장명':[], '종목명':[], '종목코드':[], '감리구분':[], '상장일자':[], '전일가':[], '종목상태':[], '테마명':[], '테마코드':[], '체크최종수정일':[]}
-
-    for code in kospi_code_list_until_now:
-        
-        today_checklist['시장명'].append('kospi')
-        today_checklist['종목명'].append(kiwoom.GetMasterCodeName(code))
-        today_checklist['종목코드'].append(code)
-        today_checklist['감리구분'].append(kiwoom.GetMasterConstruction(code))
-        today_checklist['상장일자'].append(kiwoom.GetMasterListedStockDate(code))
-        today_checklist['전일가'].append(kiwoom.GetMasterLastPrice(code))
-        today_checklist['종목상태'].append(kiwoom.GetMasterStockState(code))
-        theme_name, theme_code = get_theme_info(code, temp)
-        today_checklist['테마명'].append(theme_name)
-        today_checklist['테마코드'].append(theme_code)
-        today_checklist['체크최종수정일'].append(TODAY)
-        
-    for code in kosdaq_code_list_until_now:
-        today_checklist['시장명'].append('kosdaq')
-        today_checklist['종목명'].append(kiwoom.GetMasterCodeName(code))
-        today_checklist['종목코드'].append(code)
-        today_checklist['감리구분'].append(kiwoom.GetMasterConstruction(code))
-        today_checklist['상장일자'].append(kiwoom.GetMasterListedStockDate(code))
-        today_checklist['전일가'].append(kiwoom.GetMasterLastPrice(code))
-        today_checklist['종목상태'].append(kiwoom.GetMasterStockState(code))
-        theme_name, theme_code = get_theme_info(code, temp)
-        today_checklist['테마명'].append(theme_name)
-        today_checklist['테마코드'].append(theme_code)
-        today_checklist['체크최종수정일'].append(TODAY)
-        
-    today_checklist = pd.DataFrame(today_checklist)
-    today_checklist = today_checklist.assign(일봉관리여부=False)
-    today_checklist = today_checklist.assign(일봉최종수정일=0)
-    today_checklist = today_checklist.assign(분봉관리여부=False)
-    today_checklist = today_checklist.assign(분봉최종수정일=0)
-
+    kospi_code_list_until_now = kiwoom.GetCodeListByMarket('0')
+    kosdaq_code_list_until_now = kiwoom.GetCodeListByMarket('10')
     kospi_code_list_we_have = [i[:-4] for i in os.listdir(DIR_KOSPI_DAILY) if i.endswith('.csv')]
     kosdaq_code_list_we_have = [i[:-4] for i in os.listdir(DIR_KOSDAQ_DAILY) if i.endswith('.csv')]
-    total_code_list_we_have = set(kospi_code_list_we_have) | set(kosdaq_code_list_we_have)
-
+    total_code_list_we_have = kospi_code_list_we_have + kosdaq_code_list_we_have
     kospi_cnt_we_have = len(kospi_code_list_we_have)
     kosdaq_cnt_we_have = len(kosdaq_code_list_we_have)
 

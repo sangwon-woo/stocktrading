@@ -66,9 +66,9 @@ def update_checklist():
 
     kospi_code_list_we_have = [i[:-4] for i in os.listdir(DIR_KOSPI_DAILY) if i.endswith('.csv')]
     kosdaq_code_list_we_have = [i[:-4] for i in os.listdir(DIR_KOSDAQ_DAILY) if i.endswith('.csv')]
-    total_code_list_we_have = set(kospi_code_list_we_have) | set(kosdaq_code_list_we_have)
+    total_code_list_we_have = kospi_code_list_we_have + kosdaq_code_list_we_have
 
-    for code in kospi_code_list_we_have + kosdaq_code_list_we_have:
+    for code in total_code_list_we_have:
 
         if code in kospi_code_list_we_have:
             stock_df = pd.read_csv(DIR_KOSPI_DAILY + f'\\{code}.csv', encoding='utf-8', dtype=TRADEDATA_DTYPE, parse_dates=['날짜'])
@@ -107,7 +107,7 @@ if __name__ == '__main__':
         print("미연결")
     elif state == 1:
         print("연결완료")
-        
+
     update_checklist()
 
     
