@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 PWD = os.getcwd()
-TODAY = ''.join(str(datetime.today())[:10].split('-'))
+TODAY = datetime.today().date().strftime('%Y%m%d')
 
 DIR_KOSPI_DAILY = PWD + '\\data\\kospi_daily'
 DIR_KOSDAQ_DAILY = PWD + '\\data\\kosdaq_daily'
