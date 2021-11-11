@@ -15,7 +15,7 @@ from setting import *
 from update_daily_data import get_stock_trade_data_until_now
 
 
-def init_checklist(kospi, kosdaq):
+def init_checklist(kiwoom):
     today_checklist = {
         '시장명':[], 
         '종목명':[], 
@@ -26,7 +26,8 @@ def init_checklist(kospi, kosdaq):
         '체크최종수정일':[]
     }
 
-
+    kospi = kiwoom.GetCodeListByMarket('0')
+    kosdaq = kiwoom.GetCodeListByMarket('10')
 
 
     for code in kospi:
@@ -85,7 +86,7 @@ def iter_checklist(today_checklist):
 
     return today_checklist
 
-def save_new_stock_data(not_tracked_list):
+def save_new_stock_data(not_tracked_list, kiwoom):
     global API_COUNT
 
     for code in not_tracked_list['종목코드'].values:
@@ -128,18 +129,18 @@ def save_new_stock_data(not_tracked_list):
     return
 
 
-def update_checklist():
+def update_checklist(kiwoom):
     lastest_checklist = pd.read_csv(CSV_DAILY_CHECKLIST, 
                                     encoding='utf-8', 
                                     dtype=CHECKLIST_DTYPE)
 
-    today_checklist = init_checklist()
+    today_checklist = init_checklist(kiwoom)
     today_checklist = iter_checklist(today_checklist)
 
     not_tracked_list = today_checklist[today_checklist['일봉관리여부'] == False]
 
     if not_tracked_list.shape[0]:
-        save_new_stock_data(not_tracked_list)
+        save_new_stock_data(not_tracked_list, kiwoom)
     else:
         if lastest_checklist.equals(today_checklist):
             print('어제와 오늘의 today_checklist가 같음.')
@@ -163,7 +164,6 @@ if __name__ == '__main__':
         print("미연결")
     elif state == 1:
         print("연결완료")
-
-    update_checklist()
+    update_checklist(kiwoom)
 
     
