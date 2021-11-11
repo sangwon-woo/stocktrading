@@ -73,6 +73,7 @@ def iter_kospi(kiwoom, today_checklist, kospi_code_list_until_now):
         compare_df = kcwh_df.loc[ :recent_df.shape[0]-2, :]
 
         if not recent_df.loc[1:, :].reset_index(drop=True).equals(compare_df):
+            print()
             while kiwoom.tr_remained:    
                 temp_df = get_stock_trade_data_until_now(kiwoom, 
                                                         code,
@@ -92,7 +93,15 @@ def iter_kospi(kiwoom, today_checklist, kospi_code_list_until_now):
 
                 print("API_COUNT :", API_COUNT)
                 time.sleep(0.6)
-            max_date = recent_df['날짜'].max()
+
+            recent_df.to_csv(DIR_KOSPI_DAILY + f'\\{code}.csv', encoding='utf-8', index=None)
+            print('업데이트 및 저장 완료', end=' ')
+
+            today_checklist.loc[today_checklist['종목코드'] == code, '일봉관리여부'] = True
+            today_checklist.loc[today_checklist['종목코드'] == code, '일봉최종수정일'] = TODAY
+            print(f'today_checklist에 업데이트 완료 {i+1}/{kospi_cnt_we_have} ({API_COUNT})')
+
+            continue
 
         lastest_df = recent_df[recent_df['날짜'] > max_date]
 
@@ -169,7 +178,15 @@ def iter_kosdaq(kiwoom, today_checklist, kosdaq_code_list_until_now):
 
                 print("API_COUNT :", API_COUNT)
                 time.sleep(0.6)
-            max_date = recent_df['날짜'].max()
+                
+            recent_df.to_csv(DIR_KOSDAQ_DAILY + f'\\{code}.csv', encoding='utf-8', index=None)
+            print('업데이트 및 저장 완료', end=' ')
+
+            today_checklist.loc[today_checklist['종목코드'] == code, '일봉관리여부'] = True
+            today_checklist.loc[today_checklist['종목코드'] == code, '일봉최종수정일'] = TODAY
+            print(f'today_checklist에 업데이트 완료 {i+1}/{kospi_cnt_we_have} ({API_COUNT})')
+
+            continue
 
         lastest_df = recent_df[recent_df['날짜'] > max_date]
 
