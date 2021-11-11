@@ -70,11 +70,7 @@ if __name__ == '__main__':
 
     kospi_code_list_until_now = kiwoom.GetCodeListByMarket('0')
     kosdaq_code_list_until_now = kiwoom.GetCodeListByMarket('10')
-    kospi_code_list_we_have = [i[:-4] for i in os.listdir(DIR_KOSPI_DAILY) if i.endswith('.csv')]
-    kosdaq_code_list_we_have = [i[:-4] for i in os.listdir(DIR_KOSDAQ_DAILY) if i.endswith('.csv')]
-    total_code_list_we_have = kospi_code_list_we_have + kosdaq_code_list_we_have
-    kospi_cnt_we_have = len(kospi_code_list_we_have)
-    kosdaq_cnt_we_have = len(kosdaq_code_list_we_have)
+
 
     # for i, kcwh in enumerate(kospi_code_list_we_have):
     #     code = kcwh
