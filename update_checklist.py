@@ -152,7 +152,7 @@ def update_checklist(kiwoom):
             print('어제와 오늘의 today_checklist가 같음.')
 
     today_checklist.to_csv(CSV_TODAY_CHECKLIST, index=None, encoding='utf-8')
-
+    print('update checklist 완료')
 
 
 
