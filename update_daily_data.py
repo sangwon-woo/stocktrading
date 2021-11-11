@@ -13,7 +13,7 @@ import time
 import pandas as pd
 import numpy as np
 
-from pykiwoom.kiwoom import *
+# from pykiwoom.kiwoom import *
 from setting import *
 from update_checklist import *
 from datetime import datetime
@@ -57,11 +57,8 @@ if __name__ == '__main__':
 
     update_checklist()
 
-    STOCK_ITEM_DTYPE = {
-        '현재가' : '종가',
-        '일자' : '날짜'
-    }
-    api_cnt = 0
+
+    
 
 
     today_checklist = pd.read_csv(CSV_DAILY_CHECKLIST, index=None, encoding='utf-8')
@@ -72,48 +69,48 @@ if __name__ == '__main__':
     kosdaq_code_list_until_now = kiwoom.GetCodeListByMarket('10')
 
 
-    # for i, kcwh in enumerate(kospi_code_list_we_have):
-    #     code = kcwh
-    #     name = kiwoom.GetMasterCodeName(code)
-    #     print(f'{name}({code}) => 처리시작', end=' ')
-    #     kcwh_df = pd.read_csv(DIR_KOSPI_DAILY + f'\\{code}.csv', encoding='utf-8', dtype=TRADEDATA_DTYPE, parse_dates=['날짜'])
+    for i, kcwh in enumerate(kospi_code_list_we_have):
+        code = kcwh
+        name = kiwoom.GetMasterCodeName(code)
+        print(f'{name}({code}) => 처리시작', end=' ')
+        kcwh_df = pd.read_csv(DIR_KOSPI_DAILY + f'\\{code}.csv', encoding='utf-8', dtype=TRADEDATA_DTYPE, parse_dates=['날짜'])
         
-    #     max_date = kcwh_df['날짜'].max()
-    #     min_date = kcwh_df['날짜'].min()
+        max_date = kcwh_df['날짜'].max()
+        min_date = kcwh_df['날짜'].min()
             
-    #     if max_date == pd.Timestamp(TODAY):
-    #         print(f'오늘 날짜까지 업데이트 완료된 상태')
-    #         continue
+        if max_date == pd.Timestamp(TODAY):
+            print(f'오늘 날짜까지 업데이트 완료된 상태')
+            continue
         
-    #     if min_date < datetime(2010, 1, 1):
+        if min_date < datetime(2010, 1, 1):
             
-    #         kcwh_df = kcwh_df[kcwh_df['날짜'] > '2010-01-01']
-    #         min_date = kcwh_df['날짜'].min()
+            kcwh_df = kcwh_df[kcwh_df['날짜'] > '2010-01-01']
+            min_date = kcwh_df['날짜'].min()
         
-    #     print(f"기존 데이터는 {str(min_date)[:10]}부터 {str(max_date)[:10]}까지 존재", end=' ')
+        print(f"기존 데이터는 {str(min_date)[:10]}부터 {str(max_date)[:10]}까지 존재", end=' ')
         
-    #     if code in kospi_code_list_until_now:
-    #         print(f'현재까지 코스피에서 거래중', end=' ')
-    #     else:
-    #         # 새로운 종목이므로 데이터 프레임을 새로 만들어서 저장해야함
-    #         pass
+        if code in kospi_code_list_until_now:
+            print(f'현재까지 코스피에서 거래중', end=' ')
+        else:
+            # 새로운 종목이므로 데이터 프레임을 새로 만들어서 저장해야함
+            pass
         
-    #         continue
+            continue
             
-    #     recent_df = get_stock_trade_data_until_now(code, name, TODAY, STOCK_ITEM_DTYPE, TRADEDATA_DTYPE)
-    #     api_cnt += 1
+        recent_df = get_stock_trade_data_until_now(code, name, TODAY, STOCK_ITEM_DTYPE, TRADEDATA_DTYPE)
+        API_COUNT += 1
         
-    #     lastest_df = recent_df[recent_df['날짜'] > max_date]
-    #     if lastest_df.shape[0]:
-    #         print(f'오늘까지의 데이터에 비해 {lastest_df.shape[0]}일치 부족', end=' ')
-    #         kcwh_df = kcwh_df.append(lastest_df, ignore_index=True).sort_values(by=['날짜'], ascending=False).reset_index(drop=True)
-    #         kcwh_df.to_csv(DIR_KOSPI_DAILY + f'\\{code}.csv', encoding='utf-8', index=None)
-    #         print('업데이트 및 저장 완료', end=' ')
-    #         today_checklist.loc[today_checklist['종목코드'] == code, '일봉관리여부'] = True
-    #         today_checklist.loc[today_checklist['종목코드'] == code, '일봉최종수정일'] = TODAY
-    #         print(f'today_checklist에 업데이트 완료 {i+1}/{kospi_cnt_we_have} ({api_cnt})')
+        lastest_df = recent_df[recent_df['날짜'] > max_date]
+        if lastest_df.shape[0]:
+            print(f'오늘까지의 데이터에 비해 {lastest_df.shape[0]}일치 부족', end=' ')
+            kcwh_df = kcwh_df.append(lastest_df, ignore_index=True).sort_values(by=['날짜'], ascending=False).reset_index(drop=True)
+            kcwh_df.to_csv(DIR_KOSPI_DAILY + f'\\{code}.csv', encoding='utf-8', index=None)
+            print('업데이트 및 저장 완료', end=' ')
+            today_checklist.loc[today_checklist['종목코드'] == code, '일봉관리여부'] = True
+            today_checklist.loc[today_checklist['종목코드'] == code, '일봉최종수정일'] = TODAY
+            print(f'today_checklist에 업데이트 완료 {i+1}/{kospi_cnt_we_have} ({API_COUNT})')
             
-    #     time.sleep(0.7)
+        time.sleep(0.6)
 
     for i, kcwh in enumerate(kosdaq_code_list_we_have):
         code = kcwh
@@ -144,7 +141,7 @@ if __name__ == '__main__':
             continue
             
         recent_df = get_stock_trade_data_until_now(code, name, TODAY, STOCK_ITEM_DTYPE, TRADEDATA_DTYPE)
-        api_cnt += 1
+        API_COUNT += 1
         
         lastest_df = recent_df[recent_df['날짜'] > max_date]
         if lastest_df.shape[0]:
@@ -154,6 +151,6 @@ if __name__ == '__main__':
             print('업데이트 및 저장 완료', end=' ')
             today_checklist.loc[today_checklist['종목코드'] == code, '일봉관리여부'] = True
             today_checklist.loc[today_checklist['종목코드'] == code, '일봉최종수정일'] = TODAY
-            print(f'today_checklist에 업데이트 완료 {i+1}/{kosdaq_cnt_we_have} ({api_cnt})')
+            print(f'today_checklist에 업데이트 완료 {i+1}/{kosdaq_cnt_we_have} ({API_COUNT})')
             
         time.sleep(0.6)
