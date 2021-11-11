@@ -61,8 +61,10 @@ def init_checklist(kiwoom):
 
 def iter_checklist(today_checklist):
 
-    for code in total_code_list_we_have:
+    kospi_idx = 1
+    kosdaq_idx = 1
 
+    for code in total_code_list_we_have:
         if code in kospi_code_list_we_have:
             stock_df = pd.read_csv(DIR_KOSPI_DAILY + f'\\{code}.csv', encoding='utf-8', dtype=TRADEDATA_DTYPE, parse_dates=['날짜'])
             min_date = stock_df['날짜'].min().strftime('%Y%m%d')
@@ -72,7 +74,8 @@ def iter_checklist(today_checklist):
             today_checklist.loc[today_checklist['종목코드'] == code, '일봉최초날짜'] = min_date
             today_checklist.loc[today_checklist['종목코드'] == code, '일봉최근날짜'] = max_date
 
-            print(f'{code}완료', end=' ')
+            print(f'{code}완료 ({kospi_idx} / {kospi_cnt_we_have})')
+            kospi_idx += 1
         else:
             stock_df = pd.read_csv(DIR_KOSDAQ_DAILY + f'\\{code}.csv', encoding='utf-8', dtype=TRADEDATA_DTYPE, parse_dates=['날짜'])
             min_date = stock_df['날짜'].min().strftime('%Y%m%d')
@@ -82,7 +85,8 @@ def iter_checklist(today_checklist):
             today_checklist.loc[today_checklist['종목코드'] == code, '일봉최초날짜'] = min_date
             today_checklist.loc[today_checklist['종목코드'] == code, '일봉최근날짜'] = max_date
 
-            print(f'{code}완료', end=' ')
+            print(f'{code}완료 ({kosdaq_idx} / {kosdaq_cnt_we_have})')
+            kosdaq_idx += 1
 
     return today_checklist
 
@@ -91,7 +95,8 @@ def save_new_stock_data(not_tracked_list, kiwoom):
 
     for code in not_tracked_list['종목코드'].values:
 
-        first_df = get_stock_trade_data_until_now(code, 
+        first_df = get_stock_trade_data_until_now(kiwoom,
+                                                    code, 
                                                     kiwoom.GetMasterCodeName(code), 
                                                     TODAY, STOCK_ITEM_DTYPE, 
                                                     TRADEDATA_DTYPE)
@@ -100,7 +105,8 @@ def save_new_stock_data(not_tracked_list, kiwoom):
 
         while kiwoom.tr_remained:
 
-            temp_df = get_stock_trade_data_until_now(code, 
+            temp_df = get_stock_trade_data_until_now(kiwoom, 
+                                                    code,
                                                     kiwoom.GetMasterCodeName(code), 
                                                     TODAY, 
                                                     STOCK_ITEM_DTYPE, 
@@ -130,7 +136,7 @@ def save_new_stock_data(not_tracked_list, kiwoom):
 
 
 def update_checklist(kiwoom):
-    lastest_checklist = pd.read_csv(CSV_DAILY_CHECKLIST, 
+    lastest_checklist = pd.read_csv(CSV_LASTEST_CHECKLIST, 
                                     encoding='utf-8', 
                                     dtype=CHECKLIST_DTYPE)
 
@@ -145,8 +151,7 @@ def update_checklist(kiwoom):
         if lastest_checklist.equals(today_checklist):
             print('어제와 오늘의 today_checklist가 같음.')
 
-    lastest_checklist.to_csv(CSV_LASTEST_CHECKLIST, index=None, encoding='utf-8')
-    today_checklist.to_csv(CSV_DAILY_CHECKLIST, index=None, encoding='utf-8')
+    today_checklist.to_csv(CSV_TODAY_CHECKLIST, index=None, encoding='utf-8')
 
 
 
@@ -164,6 +169,7 @@ if __name__ == '__main__':
         print("미연결")
     elif state == 1:
         print("연결완료")
+
     update_checklist(kiwoom)
 
     

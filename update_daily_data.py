@@ -18,7 +18,7 @@ from setting import *
 from update_checklist import *
 from datetime import datetime
 
-def get_stock_trade_data_until_now(code, name, today, STOCK_ITEM_DTYPE, TRADEDATA_DTYPE, next=0):
+def get_stock_trade_data_until_now(kiwoom, code, name, today, STOCK_ITEM_DTYPE, TRADEDATA_DTYPE, next=0):
     
     recent_df = kiwoom.block_request('opt10081', 
                                     종목코드=code, 
