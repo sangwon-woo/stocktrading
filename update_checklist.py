@@ -13,6 +13,7 @@ import pandas as pd
 import os
 from pykiwoom.kiwoom import *
 from setting import *
+from update_daily_data import get_stock_trade_data_until_now
 
 
 
@@ -90,7 +91,26 @@ def update_checklist():
     not_df = today_checklist[today_checklist['일봉관리여부'] == False]
 
     if not_df.shape[0]:
-        print('새로운 종목이 생겼다!')
+        for code in not_df['종목코드'].values:
+            df = get_stock_trade_data_until_now(code, kiwoom.GetMasterCodeName(code), TODAY, STOCK_ITEM_DTYPE, TRADEDATA_DTYPE)
+            market = not_df[not_df['종목코드'] == code].values[0][0]
+            while kiwoom.tr_remained:
+                ndf = get_stock_trade_data_until_now(code, kiwoom.GetMasterCodeName(code), TODAY, STOCK_ITEM_DTYPE, TRADEDATA_DTYPE, next=2)
+                if ndf['날짜'].min() < pd.Timestamp('20100101'):
+                    ndf = ndf[ndf['날짜'] > pd.Timestamp('20100101')]
+                    df = df.append(ndf, ignore_index=True)
+                    break
+                df = df.append(ndf, ignore_index=True)
+                print(df)
+                time.sleep(0.6)
+            else:
+                print(df)
+                time.sleep(0.6)
+                
+            if market == 'kospi':
+                df.to_csv(DIR_KOSPI_DAILY + f'\\{code}.csv', encoding='utf-8', index=None)
+            else:
+                df.to_csv(DIR_KOSDAQ_DAILY + f'\\{code}.csv', encoding='utf-8', index=None)
     else:
         if lastest_checklist.equals(today_checklist):
             print('변한 것 없다!')

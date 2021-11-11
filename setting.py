@@ -38,3 +38,8 @@ TRADEDATA_DTYPE = {
     '종가' : np.uint32,
     '거래량' : np.uint32
 }
+
+STOCK_ITEM_DTYPE = {
+    '현재가' : '종가',
+    '일자' : '날짜'
+}
