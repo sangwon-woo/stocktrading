@@ -15,7 +15,7 @@ from setting import *
 from update_daily_data import get_stock_trade_data_until_now
 
 
-def init_checklist():
+def init_checklist(kospi, kosdaq):
     today_checklist = {
         '시장명':[], 
         '종목명':[], 
@@ -26,11 +26,10 @@ def init_checklist():
         '체크최종수정일':[]
     }
 
-    kospi_code_list_until_now = kiwoom.GetCodeListByMarket('0')
-    kosdaq_code_list_until_now = kiwoom.GetCodeListByMarket('10')
 
 
-    for code in kospi_code_list_until_now:
+
+    for code in kospi:
         
         today_checklist['시장명'].append('kospi')
         today_checklist['종목명'].append(kiwoom.GetMasterCodeName(code))
@@ -40,7 +39,7 @@ def init_checklist():
         today_checklist['종목상태'].append(kiwoom.GetMasterStockState(code))
         today_checklist['체크최종수정일'].append(TODAY)
         
-    for code in kosdaq_code_list_until_now:
+    for code in kosdaq:
         today_checklist['시장명'].append('kosdaq')
         today_checklist['종목명'].append(kiwoom.GetMasterCodeName(code))
         today_checklist['종목코드'].append(code)

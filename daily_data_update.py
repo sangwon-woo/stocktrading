@@ -1,7 +1,7 @@
 
 from setting import *
 from pykiwoom.kiwoom import *
-from update_daily_data import *
+# from update_daily_data import *
 from update_checklist import *
 
 
@@ -27,7 +27,9 @@ def init_kiwoom():
 
 
 if __name__ == "__main__":
-    init_kiwoom()
-    update_checklist()
+    init_kiwoom()    
+    kospi_code_list_until_now = kiwoom.GetCodeListByMarket('0')
+    kosdaq_code_list_until_now = kiwoom.GetCodeListByMarket('10')
+    update_checklist(kospi_code_list_until_now, kosdaq_code_list_until_now)
 
 
