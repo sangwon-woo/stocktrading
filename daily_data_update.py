@@ -1,7 +1,7 @@
 
 from setting import *
 from pykiwoom.kiwoom import *
-# from update_daily_data import *
+from update_daily_data import *
 from update_checklist import *
 
 
@@ -21,5 +21,5 @@ user_name = kiwoom.GetLoginInfo("USER_NAME")            # 사용자명
 print(f'{user_name}의 {accounts}계좌로 접속')
 
 update_checklist(kiwoom)
-
+iter_daily_data(kiwoom)
 
