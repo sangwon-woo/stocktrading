@@ -10,20 +10,12 @@
 '''
 
 import pandas as pd
-import os
 from pykiwoom.kiwoom import *
 from setting import *
 from update_daily_data import get_stock_trade_data_until_now
 
 
-
-
-
-def update_checklist():
-    lastest_checklist = pd.read_csv(CSV_DAILY_CHECKLIST, 
-                                    encoding='utf-8', 
-                                    dtype=CHECKLIST_DTYPE)
-
+def init_checklist():
     today_checklist = {
         '시장명':[], 
         '종목명':[], 
@@ -65,9 +57,9 @@ def update_checklist():
     today_checklist = today_checklist.assign(분봉관리여부=False)
     today_checklist = today_checklist.assign(분봉최종수정일=0)
 
-    kospi_code_list_we_have = [i[:-4] for i in os.listdir(DIR_KOSPI_DAILY) if i.endswith('.csv')]
-    kosdaq_code_list_we_have = [i[:-4] for i in os.listdir(DIR_KOSDAQ_DAILY) if i.endswith('.csv')]
-    total_code_list_we_have = kospi_code_list_we_have + kosdaq_code_list_we_have
+    return today_checklist
+
+def iter_checklist(today_checklist):
 
     for code in total_code_list_we_have:
 
@@ -79,6 +71,8 @@ def update_checklist():
             today_checklist.loc[today_checklist['종목코드'] == code, '일봉최종수정일'] = TODAY
             today_checklist.loc[today_checklist['종목코드'] == code, '일봉최초날짜'] = min_date
             today_checklist.loc[today_checklist['종목코드'] == code, '일봉최근날짜'] = max_date
+
+            print(f'{code}완료', end=' ')
         else:
             stock_df = pd.read_csv(DIR_KOSDAQ_DAILY + f'\\{code}.csv', encoding='utf-8', dtype=TRADEDATA_DTYPE, parse_dates=['날짜'])
             min_date = stock_df['날짜'].min().strftime('%Y%m%d')
@@ -88,35 +82,78 @@ def update_checklist():
             today_checklist.loc[today_checklist['종목코드'] == code, '일봉최초날짜'] = min_date
             today_checklist.loc[today_checklist['종목코드'] == code, '일봉최근날짜'] = max_date
 
-    not_df = today_checklist[today_checklist['일봉관리여부'] == False]
+            print(f'{code}완료', end=' ')
 
-    if not_df.shape[0]:
-        for code in not_df['종목코드'].values:
-            df = get_stock_trade_data_until_now(code, kiwoom.GetMasterCodeName(code), TODAY, STOCK_ITEM_DTYPE, TRADEDATA_DTYPE)
-            market = not_df[not_df['종목코드'] == code].values[0][0]
-            while kiwoom.tr_remained:
-                ndf = get_stock_trade_data_until_now(code, kiwoom.GetMasterCodeName(code), TODAY, STOCK_ITEM_DTYPE, TRADEDATA_DTYPE, next=2)
-                if ndf['날짜'].min() < pd.Timestamp('20100101'):
-                    ndf = ndf[ndf['날짜'] > pd.Timestamp('20100101')]
-                    df = df.append(ndf, ignore_index=True)
-                    break
-                df = df.append(ndf, ignore_index=True)
-                print(df)
-                time.sleep(0.6)
-            else:
-                print(df)
-                time.sleep(0.6)
-                
-            if market == 'kospi':
-                df.to_csv(DIR_KOSPI_DAILY + f'\\{code}.csv', encoding='utf-8', index=None)
-            else:
-                df.to_csv(DIR_KOSDAQ_DAILY + f'\\{code}.csv', encoding='utf-8', index=None)
+    return today_checklist
+
+def save_new_stock_data(not_tracked_list):
+    global API_COUNT
+
+    for code in not_tracked_list['종목코드'].values:
+
+        first_df = get_stock_trade_data_until_now(code, 
+                                                    kiwoom.GetMasterCodeName(code), 
+                                                    TODAY, STOCK_ITEM_DTYPE, 
+                                                    TRADEDATA_DTYPE)
+        API_COUNT += 1
+        market = not_tracked_list[not_tracked_list['종목코드'] == code].values[0][0]
+
+        while kiwoom.tr_remained:
+
+            temp_df = get_stock_trade_data_until_now(code, 
+                                                    kiwoom.GetMasterCodeName(code), 
+                                                    TODAY, 
+                                                    STOCK_ITEM_DTYPE, 
+                                                    TRADEDATA_DTYPE, 
+                                                    next=2)
+            API_COUNT += 1
+
+            if temp_df['날짜'].min() < pd.Timestamp('20100101'):
+                temp_df = temp_df[temp_df['날짜'] > pd.Timestamp('20100101')]
+                first_df = first_df.append(temp_df, ignore_index=True)
+                break
+
+            first_df = first_df.append(temp_df, ignore_index=True)
+
+            print("API_COUNT :", API_COUNT)
+            time.sleep(0.6)
+        else:
+            print("API_COUNT :", API_COUNT)
+            time.sleep(0.6)
+
+        if market == 'kospi':
+            first_df.to_csv(DIR_KOSPI_DAILY + f'\\{code}.csv', encoding='utf-8', index=None)
+        else:
+            first_df.to_csv(DIR_KOSDAQ_DAILY + f'\\{code}.csv', encoding='utf-8', index=None)
+
+    return
+
+
+def update_checklist():
+    lastest_checklist = pd.read_csv(CSV_DAILY_CHECKLIST, 
+                                    encoding='utf-8', 
+                                    dtype=CHECKLIST_DTYPE)
+
+    today_checklist = init_checklist()
+    today_checklist = iter_checklist(today_checklist)
+
+    not_tracked_list = today_checklist[today_checklist['일봉관리여부'] == False]
+
+    if not_tracked_list.shape[0]:
+        save_new_stock_data(not_tracked_list)
     else:
         if lastest_checklist.equals(today_checklist):
-            print('변한 것 없다!')
+            print('어제와 오늘의 today_checklist가 같음.')
 
     lastest_checklist.to_csv(CSV_LASTEST_CHECKLIST, index=None, encoding='utf-8')
     today_checklist.to_csv(CSV_DAILY_CHECKLIST, index=None, encoding='utf-8')
+
+
+
+
+
+
+
 
 if __name__ == '__main__':
     kiwoom = Kiwoom()

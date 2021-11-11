@@ -13,12 +13,12 @@ import time
 import pandas as pd
 import numpy as np
 
-# from pykiwoom.kiwoom import *
+
 from setting import *
 from update_checklist import *
 from datetime import datetime
 
-def get_stock_trade_data_until_now(code, name, today, STOCK_ITEM_DTYPE, dtype, next=0):
+def get_stock_trade_data_until_now(code, name, today, STOCK_ITEM_DTYPE, TRADEDATA_DTYPE, next=0):
     
     recent_df = kiwoom.block_request('opt10081', 
                                     종목코드=code, 
@@ -32,7 +32,7 @@ def get_stock_trade_data_until_now(code, name, today, STOCK_ITEM_DTYPE, dtype, n
     recent_df = recent_df[recent_df.columns[:8]]
     recent_df = recent_df[['종목코드', '날짜', '시가', '고가', '저가', '종가', '거래량']]
     recent_df.insert(1, '종목명', name)
-    recent_df = recent_df.astype(dtype)
+    recent_df = recent_df.astype(TRADEDATA_DTYPE)
     
     return recent_df
 
