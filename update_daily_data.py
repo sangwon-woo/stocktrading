@@ -18,7 +18,7 @@ from setting import *
 from update_checklist import *
 from datetime import datetime
 
-def get_stock_trade_data_until_now(code, name, today, col_map, dtype, next=0):
+def get_stock_trade_data_until_now(code, name, today, STOCK_ITEM_DTYPE, dtype, next=0):
     
     recent_df = kiwoom.block_request('opt10081', 
                                     종목코드=code, 
@@ -26,7 +26,7 @@ def get_stock_trade_data_until_now(code, name, today, col_map, dtype, next=0):
                                     수정주가구분=1, 
                                     output='주식일봉차트조회',
                                     next=next)
-    recent_df = recent_df.rename(columns=col_map)
+    recent_df = recent_df.rename(columns=STOCK_ITEM_DTYPE)
     recent_df['날짜'] = pd.to_datetime(recent_df['날짜'])
     recent_df['종목코드'] = code
     recent_df = recent_df[recent_df.columns[:8]]
@@ -57,7 +57,7 @@ if __name__ == '__main__':
 
     update_checklist()
 
-    col_map = {
+    STOCK_ITEM_DTYPE = {
         '현재가' : '종가',
         '일자' : '날짜'
     }
@@ -104,7 +104,7 @@ if __name__ == '__main__':
         
     #         continue
             
-    #     recent_df = get_stock_trade_data_until_now(code, name, TODAY, col_map, TRADEDATA_DTYPE)
+    #     recent_df = get_stock_trade_data_until_now(code, name, TODAY, STOCK_ITEM_DTYPE, TRADEDATA_DTYPE)
     #     api_cnt += 1
         
     #     lastest_df = recent_df[recent_df['날짜'] > max_date]
@@ -147,7 +147,7 @@ if __name__ == '__main__':
         
             continue
             
-        recent_df = get_stock_trade_data_until_now(code, name, TODAY, col_map, TRADEDATA_DTYPE)
+        recent_df = get_stock_trade_data_until_now(code, name, TODAY, STOCK_ITEM_DTYPE, TRADEDATA_DTYPE)
         api_cnt += 1
         
         lastest_df = recent_df[recent_df['날짜'] > max_date]
