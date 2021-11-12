@@ -25,17 +25,14 @@ def get_stock_trade_data_until_now(kiwoom, code, name, today, STOCK_ITEM_DTYPE, 
                                     수정주가구분=1, 
                                     output='주식일봉차트조회',
                                     next=next)
+    if not recent_df['현재가'][0]:
+        return None
     recent_df = recent_df.rename(columns=STOCK_ITEM_DTYPE)
     recent_df['날짜'] = pd.to_datetime(recent_df['날짜'])
     recent_df['종목코드'] = code
     recent_df = recent_df[recent_df.columns[:8]]
     recent_df = recent_df[['종목코드', '날짜', '시가', '고가', '저가', '종가', '거래량']]
     recent_df.insert(1, '종목명', name)
-    
-    if not recent_df['현재가'][0]:
-        return None
-
-
     recent_df = recent_df.astype(TRADEDATA_DTYPE)
     
     return recent_df
