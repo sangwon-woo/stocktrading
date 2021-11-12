@@ -14,6 +14,8 @@ DIR_KOSDAQ_MINUTELY = PWD + '\\data\\kosdaq_minutely'
 CSV_TODAY_CHECKLIST = PWD + f'\\data\\past_checklist\\daily_checklist_{TODAY}.csv'
 csv_lastest_checklist = sorted(os.listdir(PWD + '\\data\\past_checklist'))[-1]
 CSV_LASTEST_CHECKLIST = PWD + f'\\data\\past_checklist\\{csv_lastest_checklist}'
+CSV_TODAY_TREND_ANALYSIS = PWD + f'\\data\\trend_analysis\\trend_analysis_{TODAY}.csv'
+
 
 CHECKLIST_DTYPE ={
     '시장명' : 'category',
