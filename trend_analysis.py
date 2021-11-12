@@ -103,3 +103,16 @@ def trend_analysis(timespan, code):
     df['상승추세강도'] = up_trend_power
     
     return df.iloc[-1, [1, 2, 15, 17, 18]]
+
+def run_trend_analysis():
+    total_df = pd.DataFrame()
+    for days in range(10, 121):
+        no_volume_list = get_no_volume_list(days)
+        tdf = pd.DataFrame()
+        for code in kosdaq_code_list_we_have:
+            if code in no_volume_list: continue
+            tdf = tdf.append(trend_analysis(days, code))
+        total_df = total_df.append(tdf)
+        print(f'{days} 완료')
+
+    total_df.to_csv(CSV_TODAY_TREND_ANALYSIS, encoding='utf-8', index=None)
