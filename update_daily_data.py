@@ -26,7 +26,7 @@ def get_stock_trade_data_until_now(kiwoom, code, name, today, STOCK_ITEM_DTYPE, 
                                     output='주식일봉차트조회',
                                     next=next)
     if not recent_df['종목코드'].any():
-        return None
+        return None, True
     recent_df = recent_df.rename(columns=STOCK_ITEM_DTYPE)
     recent_df['날짜'] = pd.to_datetime(recent_df['날짜'])
     recent_df['종목코드'] = code
@@ -35,7 +35,7 @@ def get_stock_trade_data_until_now(kiwoom, code, name, today, STOCK_ITEM_DTYPE, 
     recent_df.insert(1, '종목명', name)
     recent_df = recent_df.astype(TRADEDATA_DTYPE)
     
-    return recent_df
+    return recent_df, False
 
 def iter_kospi(kiwoom, today_checklist, kospi_code_list_until_now):
     global API_COUNT
@@ -65,7 +65,7 @@ def iter_kospi(kiwoom, today_checklist, kospi_code_list_until_now):
         else:
             print(f'현재 코스피에서 거래 안됨', end=' ')
             
-        recent_df = get_stock_trade_data_until_now(kiwoom,
+        recent_df, flag = get_stock_trade_data_until_now(kiwoom,
                                                     code, 
                                                     name, 
                                                     TODAY, 
@@ -73,8 +73,9 @@ def iter_kospi(kiwoom, today_checklist, kospi_code_list_until_now):
                                                     TRADEDATA_DTYPE)
         API_COUNT += 1
 
-        if not recent_df:
+        if flag:
             print(f'현재 데이터를 불러올 수 없는 상태')
+            time.sleep(0.6)
             continue
         
         compare_df = kcwh_df.loc[ :recent_df.shape[0]-2, :]
@@ -82,7 +83,7 @@ def iter_kospi(kiwoom, today_checklist, kospi_code_list_until_now):
         if not recent_df.loc[1:, :].reset_index(drop=True).equals(compare_df):
             print()
             while kiwoom.tr_remained:    
-                temp_df = get_stock_trade_data_until_now(kiwoom, 
+                temp_df, _ = get_stock_trade_data_until_now(kiwoom, 
                                                         code,
                                                         kiwoom.GetMasterCodeName(code), 
                                                         TODAY, 
@@ -155,7 +156,7 @@ def iter_kosdaq(kiwoom, today_checklist, kosdaq_code_list_until_now):
         else:
             print(f'현재 코스닥에서 거래 안됨', end=' ')
             
-        recent_df = get_stock_trade_data_until_now(kiwoom,
+        recent_df, flag = get_stock_trade_data_until_now(kiwoom,
                                                     code, 
                                                     name, 
                                                     TODAY, 
@@ -163,15 +164,16 @@ def iter_kosdaq(kiwoom, today_checklist, kosdaq_code_list_until_now):
                                                     TRADEDATA_DTYPE)
         API_COUNT += 1
 
-        if not recent_df:
+        if flag:
             print(f'현재 데이터를 불러올 수 없는 상태')
+            time.sleep(0.6)
             continue
         
         compare_df = kcwh_df.loc[ :recent_df.shape[0]-2, :]
 
         if not recent_df.loc[1:, :].reset_index(drop=True).equals(compare_df):
             while kiwoom.tr_remained:    
-                temp_df = get_stock_trade_data_until_now(kiwoom, 
+                temp_df, _ = get_stock_trade_data_until_now(kiwoom, 
                                                         code,
                                                         kiwoom.GetMasterCodeName(code), 
                                                         TODAY, 
