@@ -9,6 +9,7 @@
 모든 종목에 대해 위의 과정을 반복한다.
 
 '''
+from os import rename
 import time
 import pandas as pd
 import numpy as np
@@ -30,6 +31,11 @@ def get_stock_trade_data_until_now(kiwoom, code, name, today, STOCK_ITEM_DTYPE, 
     recent_df = recent_df[recent_df.columns[:8]]
     recent_df = recent_df[['종목코드', '날짜', '시가', '고가', '저가', '종가', '거래량']]
     recent_df.insert(1, '종목명', name)
+    
+    if not recent_df['현재가'][0]:
+        return None
+
+
     recent_df = recent_df.astype(TRADEDATA_DTYPE)
     
     return recent_df
@@ -69,6 +75,10 @@ def iter_kospi(kiwoom, today_checklist, kospi_code_list_until_now):
                                                     STOCK_ITEM_DTYPE, 
                                                     TRADEDATA_DTYPE)
         API_COUNT += 1
+
+        if not recent_df:
+            print(f'현재 데이터를 불러올 수 없는 상태')
+            continue
         
         compare_df = kcwh_df.loc[ :recent_df.shape[0]-2, :]
 
@@ -155,6 +165,10 @@ def iter_kosdaq(kiwoom, today_checklist, kosdaq_code_list_until_now):
                                                     STOCK_ITEM_DTYPE, 
                                                     TRADEDATA_DTYPE)
         API_COUNT += 1
+
+        if not recent_df:
+            print(f'현재 데이터를 불러올 수 없는 상태')
+            continue
         
         compare_df = kcwh_df.loc[ :recent_df.shape[0]-2, :]
 
