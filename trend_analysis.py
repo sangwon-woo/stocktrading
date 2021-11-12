@@ -13,8 +13,19 @@
 import pandas as pd
 from setting import *
 
+def get_no_volume_list(days):
+    no_volume_list = []
+    for code in kosdaq_code_list_we_have:
+        df = pd.read_csv(DIR_KOSDAQ_DAILY + f'\\{code}.csv', dtype=TRADEDATA_DTYPE, encoding='utf-8', parse_dates=['날짜'])
+        tdf = df.loc[:days-1, :]
+        zero_volume_days = tdf[tdf['거래량'] == 0].shape[0]
+        if zero_volume_days:
+            no_volume_list.append(code)
+
+    return no_volume_list
+
 def trend_analysis(timespan, code):
-    nrows = TIMESPAN[timespan] # N3
+    nrows = timespan
     if code in kospi_code_list_we_have:
         
         df = pd.read_csv(DIR_KOSPI_DAILY + f'\\{code}.csv', 
@@ -32,9 +43,10 @@ def trend_analysis(timespan, code):
     if not df.loc[0, '거래량']:
         return None
     
-    df = df.iloc[:nrows, :]
+    df = df.iloc[:nrows-1, :]
     df = df.sort_values(by=['날짜']).reset_index(drop=True)
     df.reset_index(inplace=True)
+    df['index'] += 1
 
     df['평균매매가'] = (df[['시가', '종가']].sum(axis=1) / 2 + df[['시가', '종가', '저가', '고가']].sum(axis=1))/5
     standard_price = df.loc[0, '평균매매가']
@@ -46,17 +58,14 @@ def trend_analysis(timespan, code):
     ni = df.loc[df['변환주가'] == min_price, 'index'].values[0]
     max_index = 1 if df.loc[0, '변환주가'] == max_price else xi                          # L2
     min_index = 1 if df.loc[0, '변환주가'] == min_price else ni                          # M2
-    average_price_move = (max_price - min_price) / max_index                             # R3
     first_price = 10000                                                                  # T2
     last_price = df['변환주가'].values[-1]                                                # T3
 
     X_of_open_close = (last_price - first_price) / nrows                                  # T12 = (T3-T2) / N3
     intercept_of_open_close = 10000                                                       # V12
-    Y_of_open_close = lambda x: X_of_open_close * x + intercept_of_open_close             # 
 
     X_of_high_low = (max_price - min_price) / (max_index - min_index)                     # T16 = (P2-P3) / (L2-M2)
     intercept_of_high_low = max_price - (max_index * X_of_high_low)                       # V16 = P2 - (L2*T16)
-    Y_of_high_low = lambda x: X_of_high_low * x + intercept_of_high_low
 
     _1 = (1 + X_of_open_close ** 2) ** (1 / 2)                                            # W13
     _2 = (1 + X_of_high_low ** 2) ** (1 / 2)                                              # W17
@@ -93,4 +102,4 @@ def trend_analysis(timespan, code):
     df['기간상승/하락률'] = ((last_price / first_price) - 1) *100
     df['상승추세강도'] = up_trend_power
     
-    return df.iloc[-1, :]
+    return df.iloc[-1, [1, 2, 15, 17, 18]]
