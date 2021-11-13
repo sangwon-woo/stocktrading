@@ -134,7 +134,7 @@ def iter_kospi(kiwoom, today_checklist, kospi_code_list_until_now):
         max_date = kcwh_df['날짜'].max()
         min_date = kcwh_df['날짜'].min()
             
-        if max_date == pd.Timestamp('20211112'):
+        if max_date == pd.Timestamp(TODAY):
             print(f'오늘 날짜까지 업데이트 완료된 상태')
             continue
         
@@ -196,7 +196,7 @@ def iter_kosdaq(kiwoom, today_checklist, kosdaq_code_list_until_now):
         max_date = kcwh_df['날짜'].max()
         min_date = kcwh_df['날짜'].min()
             
-        if max_date == pd.Timestamp('20211112'):
+        if max_date == pd.Timestamp(TODAY):
             print(f'오늘 날짜까지 업데이트 완료된 상태')
             continue
         
@@ -248,8 +248,8 @@ def iter_kosdaq(kiwoom, today_checklist, kosdaq_code_list_until_now):
 
 def iter_daily_data(kiwoom):
 
-    # today_checklist = pd.read_csv(CSV_TODAY_CHECKLIST, encoding='utf-8', dtype=CHECKLIST_DTYPE)
-    today_checklist = pd.read_csv(PWD+'\\data\\past_checklist\\daily_checklist_20211112.csv', encoding='utf-8', dtype=CHECKLIST_DTYPE)
+    today_checklist = pd.read_csv(CSV_TODAY_CHECKLIST, encoding='utf-8', dtype=CHECKLIST_DTYPE)
+    # today_checklist = pd.read_csv(PWD+'\\data\\past_checklist\\daily_checklist_20211112.csv', encoding='utf-8', dtype=CHECKLIST_DTYPE)
 
 
     kospi_code_list_until_now = kiwoom.GetCodeListByMarket('0')
