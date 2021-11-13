@@ -24,7 +24,6 @@ CHECKLIST_DTYPE ={
     '감리구분' : 'category',
     '체크최종수정일' : 'category',
     '일봉관리여부' : bool,
-    '일봉최종수정일' : 'category',
     '일봉최초일' : 'category',
     '일봉최말일' : 'category',
     '분봉관리여부' : bool,
