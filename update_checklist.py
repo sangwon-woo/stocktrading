@@ -94,12 +94,13 @@ def save_new_stock_data(not_tracked_list, kiwoom):
     global API_COUNT
 
     for code in not_tracked_list['종목코드'].values:
-
+        print(f'신규 종목코드 : {code} 데이터 다운로드 시작', end=' ')
         first_df = get_stock_trade_data_until_now(kiwoom,
                                                     code, 
                                                     kiwoom.GetMasterCodeName(code), 
                                                     TODAY, STOCK_ITEM_DTYPE, 
                                                     TRADEDATA_DTYPE)
+        time.sleep(0.7)
         API_COUNT += 1
         market = not_tracked_list[not_tracked_list['종목코드'] == code].values[0][0]
 
@@ -112,6 +113,7 @@ def save_new_stock_data(not_tracked_list, kiwoom):
                                                     STOCK_ITEM_DTYPE, 
                                                     TRADEDATA_DTYPE, 
                                                     next=2)
+            time.sleep(2)
             API_COUNT += 1
 
             if temp_df['날짜'].min() < pd.Timestamp('20100101'):
@@ -122,17 +124,15 @@ def save_new_stock_data(not_tracked_list, kiwoom):
             first_df = first_df.append(temp_df, ignore_index=True)
 
             print("API_COUNT :", API_COUNT)
-            time.sleep(0.6)
         else:
             print("API_COUNT :", API_COUNT)
-            time.sleep(0.6)
 
         if market == 'kospi':
             first_df.to_csv(DIR_KOSPI_DAILY + f'\\{code}.csv', encoding='utf-8', index=None)
         else:
             first_df.to_csv(DIR_KOSDAQ_DAILY + f'\\{code}.csv', encoding='utf-8', index=None)
 
-    return
+        print('업데이트 및 저장 완료')
 
 
 def update_checklist(kiwoom):
