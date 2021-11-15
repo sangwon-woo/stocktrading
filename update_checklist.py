@@ -136,9 +136,6 @@ def save_new_stock_data(not_tracked_list, kiwoom):
 
 
 def update_checklist(kiwoom):
-    lastest_checklist = pd.read_csv(CSV_LASTEST_CHECKLIST, 
-                                    encoding='utf-8', 
-                                    dtype=CHECKLIST_DTYPE)
 
     today_checklist = init_checklist(kiwoom)
     today_checklist = iter_checklist(today_checklist)
