@@ -1,10 +1,25 @@
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 import numpy as np
 import pandas as pd
 
+
+def get_today(today):
+    today_idx = today.weekday()
+    if today_idx in [0,1,2,3,4]:
+        return today.date().strftime('%Y%m%d')
+    else:
+        if today_idx == 5:
+            return (today - timedelta(days=1)).date().strftime("%Y%m%d")
+        elif today_idx == 6:
+            return (today - timedelta(days=2)).date().strftime("%Y%m%d")
+
+
+
 PWD = os.getcwd()
-TODAY = datetime.today().date().strftime('%Y%m%d')
+
+TODAY = get_today(datetime.today())
+
 
 DIR_KOSPI_DAILY = PWD + '\\data\\kospi_daily'
 DIR_KOSDAQ_DAILY = PWD + '\\data\\kosdaq_daily'
