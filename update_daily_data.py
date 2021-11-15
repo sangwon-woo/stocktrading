@@ -249,8 +249,6 @@ def iter_kosdaq(kiwoom, today_checklist, kosdaq_code_list_until_now):
 def iter_daily_data(kiwoom):
 
     today_checklist = pd.read_csv(CSV_TODAY_CHECKLIST, encoding='utf-8', dtype=CHECKLIST_DTYPE)
-    # today_checklist = pd.read_csv(PWD+'\\data\\past_checklist\\daily_checklist_20211112.csv', encoding='utf-8', dtype=CHECKLIST_DTYPE)
-
 
     kospi_code_list_until_now = kiwoom.GetCodeListByMarket('0')
     kosdaq_code_list_until_now = kiwoom.GetCodeListByMarket('10')
