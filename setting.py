@@ -85,3 +85,5 @@ today_candidates = lastest_checklist[lastest_checklist['일봉최종수정일'] 
 today_candidates = today_candidates[['시장명', '종목명', '종목코드']]
 kospi_not_yet = list(today_candidates[today_candidates['시장명'] == 'kospi']['종목코드'].values)
 kosdaq_not_yet = list(today_candidates[today_candidates['시장명'] == 'kosdaq']['종목코드'].values)
+kospi_cnt_not_yet = len(kospi_not_yet)
+kosdaq_cnt_not_yet = len(kosdaq_not_yet)
