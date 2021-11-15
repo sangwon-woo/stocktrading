@@ -92,7 +92,7 @@ def get_total_df(market):
     total_df['날짜'] = pd.to_datetime(total_df['날짜'])
     total_df['종목코드'] = total_df['종목코드'].astype('category')
     total_df['종목명'] = total_df['종목명'].astype('category')
-    total_df = total_df.sort_values(by=['종목코드', '날짜']).reset_index(drop=True)
+    total_df = total_df.sort_values(by=['종목코드', '날짜'], ascending=[True, False]).reset_index(drop=True)
 
     total_df.to_feather(PWD + f'\\data\\total_{market}_data_{TODAY}.arrx')
 
@@ -101,7 +101,7 @@ def get_total_df(market):
 def append_trend_analysis(total_df, market):
     
     save_dir = CSV_KOSPI_TREND_ANALYSIS if market == 'kospi' else CSV_KOSDAQ_TREND_ANALYSIS
-
+    
     trend_df = pd.DataFrame()
 
     for code in total_df['종목코드'].unique():
@@ -120,7 +120,7 @@ def append_trend_analysis(total_df, market):
                 
             temp_df = code_df.loc[:days-1, :]
             if temp_df[temp_df['거래량'] == 0].shape[0]:
-                print(f'거래량이 없는 종목이라서 {code} 분석 종료', end=' ')
+                print(f'{days}일 내에 거래량이 없는 종목이라서 {code} 분석 종료', end=' ')
                 break
                 
             tdf = get_trend_analysis(temp_df, days)
