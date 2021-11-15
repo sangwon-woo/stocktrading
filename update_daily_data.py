@@ -208,7 +208,7 @@ def iter_kospi(kiwoom, today_checklist, kospi_code_list_until_now, kospi_not_yet
         if lastest_df.shape[0]:
             print(f'오늘까지의 데이터에 비해 {lastest_df.shape[0]-1}일치 부족', end=' ')
 
-            pre_df = (pre_df.append(lastest_df, ignore_index=True)
+            pre_df = (pre_df.iloc[1:, :].append(lastest_df, ignore_index=True)
                               .sort_values(by=['날짜'], ascending=False)
                               .reset_index(drop=True))
 
@@ -217,7 +217,7 @@ def iter_kospi(kiwoom, today_checklist, kospi_code_list_until_now, kospi_not_yet
 
             today_checklist.loc[today_checklist['종목코드'] == code, '일봉관리여부'] = True
             today_checklist.loc[today_checklist['종목코드'] == code, '일봉최종수정일'] = TODAY
-            today_checklist.loc[today_checklist['종목코드'] == code, '일봉최근날짜'] = max_date.strftime("%Y%m%d")
+            today_checklist.loc[today_checklist['종목코드'] == code, '일봉최근날짜'] = pre_df['날짜'].max().strftime("%Y%m%d")
 
             print(f'today_checklist에 업데이트 완료 {i+1}/{kospi_cnt_not_yet} ({API_COUNT})')
 
@@ -241,7 +241,7 @@ def iter_kosdaq(kiwoom, today_checklist, kosdaq_code_list_until_now, kosdaq_not_
             print(f'오늘 날짜까지 업데이트 완료된 상태', end=' ')
             today_checklist.loc[today_checklist['종목코드'] == code, '일봉관리여부'] = True
             today_checklist.loc[today_checklist['종목코드'] == code, '일봉최종수정일'] = TODAY
-            today_checklist.loc[today_checklist['종목코드'] == code, '일봉최근날짜'] = pre_df['날짜'].max().strftime("%Y%m%d")
+            today_checklist.loc[today_checklist['종목코드'] == code, '일봉최근날짜'] = max_date.strftime("%Y%m%d")
 
             print(f'today_checklist에 업데이트 완료 {i+1}/{kospi_cnt_not_yet} ({API_COUNT})')
             continue
@@ -281,7 +281,7 @@ def iter_kosdaq(kiwoom, today_checklist, kosdaq_code_list_until_now, kosdaq_not_
         if lastest_df.shape[0]:
             print(f'오늘까지의 데이터에 비해 {lastest_df.shape[0]}일치 부족', end=' ')
 
-            pre_df = (pre_df.append(lastest_df, ignore_index=True)
+            pre_df = (pre_df.iloc[1:, :].append(lastest_df, ignore_index=True)
                               .sort_values(by=['날짜'], ascending=False)
                               .reset_index(drop=True))
             pre_df.to_csv(DIR_KOSDAQ_DAILY + f'\\{code}.csv', encoding='utf-8', index=None)
