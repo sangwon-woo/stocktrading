@@ -122,10 +122,10 @@ def get_total_trade_data_kosdaq(kiwoom, code, recent_df, today_checklist, i):
     print(f'today_checklist에 업데이트 완료 {i+1}/{kosdaq_cnt_we_have} ({API_COUNT})')
     
 
-def iter_kospi(kiwoom, today_checklist, kospi_code_list_until_now):
+def iter_kospi(kiwoom, today_checklist, kospi_code_list_until_now, kospi_not_yet):
     global API_COUNT
 
-    for i, kcwh in enumerate(kospi_code_list_we_have):
+    for i, kcwh in enumerate(kospi_not_yet):
         code = kcwh
         name = kiwoom.GetMasterCodeName(code)
         print(f'{name}({code}) => 처리시작', end=' ')
@@ -184,10 +184,10 @@ def iter_kospi(kiwoom, today_checklist, kospi_code_list_until_now):
             print(f'today_checklist에 업데이트 완료 {i+1}/{kospi_cnt_we_have} ({API_COUNT})')
 
 
-def iter_kosdaq(kiwoom, today_checklist, kosdaq_code_list_until_now):
+def iter_kosdaq(kiwoom, today_checklist, kosdaq_code_list_until_now, kosdaq_not_yet):
     global API_COUNT
 
-    for i, kcwh in enumerate(kosdaq_code_list_we_have):
+    for i, kcwh in enumerate(kosdaq_not_yet):
         code = kcwh
         name = kiwoom.GetMasterCodeName(code)
         print(f'{name}({code}) => 처리시작', end=' ')
@@ -253,9 +253,9 @@ def iter_daily_data(kiwoom):
     kospi_code_list_until_now = kiwoom.GetCodeListByMarket('0')
     kosdaq_code_list_until_now = kiwoom.GetCodeListByMarket('10')
 
-    iter_kospi(kiwoom, today_checklist, kospi_code_list_until_now)
+    iter_kospi(kiwoom, today_checklist, kospi_code_list_until_now, kospi_not_yet)
     print('코스피 목록 완료')
-    iter_kosdaq(kiwoom, today_checklist, kosdaq_code_list_until_now)
+    iter_kosdaq(kiwoom, today_checklist, kosdaq_code_list_until_now, kosdaq_not_yet)
     print('코스닥 목록 완료')
 
     today_checklist.to_csv(CSV_TODAY_CHECKLIST, encoding='utf-8', index=None)
