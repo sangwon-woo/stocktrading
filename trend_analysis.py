@@ -9,45 +9,16 @@
 아니면 1개월부터 볼까. 잘 모르겠다. 
 요즘 시장은 2주
 '''
-
+import time
 import pandas as pd
 from setting import *
 
-def get_no_volume_list(days):
-    no_volume_list = []
-    for code in kosdaq_code_list_we_have:
-        df = pd.read_csv(DIR_KOSDAQ_DAILY + f'\\{code}.csv', dtype=TRADEDATA_DTYPE, encoding='utf-8', parse_dates=['날짜'])
-        tdf = df.loc[:days-1, :]
-        zero_volume_days = tdf[tdf['거래량'] == 0].shape[0]
-        if zero_volume_days:
-            no_volume_list.append(code)
-
-    return no_volume_list
-
-def trend_analysis(timespan, code):
-    nrows = timespan
-    if code in kospi_code_list_we_have:
-        
-        df = pd.read_csv(DIR_KOSPI_DAILY + f'\\{code}.csv', 
-                         encoding='utf-8', 
-                         dtype=TRADEDATA_DTYPE, 
-                         parse_dates=['날짜'])
-    else:
-        df = pd.read_csv(DIR_KOSDAQ_DAILY + f'\\{code}.csv', 
-                         encoding='utf-8', 
-                         dtype=TRADEDATA_DTYPE, 
-                         parse_dates=['날짜'])
-    if df.shape[0] < nrows:
-        return None
+def get_trend_analysis(df, days):
     
-    if not df.loc[0, '거래량']:
-        return None
-    
-    df = df.iloc[:nrows-1, :]
     df = df.sort_values(by=['날짜']).reset_index(drop=True)
     df.reset_index(inplace=True)
     df['index'] += 1
-
+    
     df['평균매매가'] = (df[['시가', '종가']].sum(axis=1) / 2 + df[['시가', '종가', '저가', '고가']].sum(axis=1))/5
     standard_price = df.loc[0, '평균매매가']
 
@@ -61,7 +32,7 @@ def trend_analysis(timespan, code):
     first_price = 10000                                                                  # T2
     last_price = df['변환주가'].values[-1]                                                # T3
 
-    X_of_open_close = (last_price - first_price) / nrows                                  # T12 = (T3-T2) / N3
+    X_of_open_close = (last_price - first_price) / days                                  # T12 = (T3-T2) / N3
     intercept_of_open_close = 10000                                                       # V12
 
     X_of_high_low = (max_price - min_price) / (max_index - min_index)                     # T16 = (P2-P3) / (L2-M2)
@@ -81,8 +52,8 @@ def trend_analysis(timespan, code):
 
 
 
-    x_axis_one_scale = (max_price - min_price) / (nrows -1) # AI10
-    x_data_count = nrows -1 # AI11
+    x_axis_one_scale = (max_price - min_price) / (days -1) # AI10
+    x_data_count = days -1 # AI11
     max_min_height = max_price - min_price # AI12
     best_trend_energy = x_data_count * max_min_height / 2 # AI13
     open_close_trend_energy = (last_price - first_price) * x_data_count / 2 # AI14
@@ -101,18 +72,69 @@ def trend_analysis(timespan, code):
     df['괴리도'] = cross_line_gap.mean() / ((first_price + last_price) / 2) * 100
     df['기간상승/하락률'] = ((last_price / first_price) - 1) *100
     df['상승추세강도'] = up_trend_power
+    df['타임스팬'] = days
     
-    return df.iloc[-1, [1, 2, 15, 17, 18]]
+    return df.iloc[-1, [1, 2, 19, 15, 17, 18]]
+
+def get_total_df(market):
+
+    code_list = kospi_code_list_we_have if market == 'kospi' else kosdaq_code_list_we_have
+    code_dir = DIR_KOSPI_DAILY if market == 'kospi' else DIR_KOSDAQ_DAILY
+    code_cnt = kospi_cnt_we_have if market == 'kospi' else kosdaq_cnt_we_have
+    total_df = pd.DataFrame()
+
+    for i, code in enumerate(code_list):
+        df = pd.read_csv(code_dir + f'\\{code}.csv', encoding='utf-8', dtype=TRADEDATA_DTYPE)
+        total_df = total_df.append(df, ignore_index=True)
+        
+        print(f'{i+1} / {code_cnt}')
+    
+    total_df['날짜'] = pd.to_datetime(total_df['날짜'])
+    total_df['종목코드'] = total_df['종목코드'].astype('category')
+    total_df['종목명'] = total_df['종목명'].astype('category')
+    total_df = total_df.sort_values(by=['종목코드', '날짜']).reset_index(drop=True)
+
+    return total_df
+
+def append_trend_analysis(total_df, market):
+    
+    save_dir = CSV_KOSPI_TREND_ANALYSIS if market == 'kospi' else CSV_KOSDAQ_TREND_ANALYSIS
+
+    trend_df = pd.DataFrame()
+
+    for code in total_df['종목코드'].unique():
+        print(f'{code} 시작', end=' ')
+        code_df = total_df[total_df['종목코드'] == code].reset_index(drop=True)
+        max_date = code_df['날짜'].max()
+        min_date = code_df['날짜'].min()
+        nrows = code_df.shape[0]
+        
+        return_df = pd.DataFrame()
+        
+        for days in range(10, 121):
+            if nrows < days:
+                print(f'총 데이터 수가 {days}일 보다 적음, {code} 분석 종료', end=' ')
+                break
+                
+            temp_df = code_df.loc[:days-1, :]
+            if temp_df[temp_df['거래량'] == 0].shape[0]:
+                print(f'거래량이 없는 종목이라서 {code} 분석 종료', end=' ')
+                break
+                
+            tdf = get_trend_analysis(temp_df, days)
+            return_df = return_df.append(tdf)
+        trend_df = trend_df.append(return_df, ignore_index=True)
+        
+        print(f'{code} 완료')
+
+    trend_df.to_csv(save_dir, encoding='utf-8', index=None)
+
+    print(f'{TODAY} 기준 {market} 추세 분석 완료')
+    time.sleep(2)
 
 def run_trend_analysis():
-    total_df = pd.DataFrame()
-    for days in range(10, 121):
-        no_volume_list = get_no_volume_list(days)
-        tdf = pd.DataFrame()
-        for code in kosdaq_code_list_we_have:
-            if code in no_volume_list: continue
-            tdf = tdf.append(trend_analysis(days, code))
-        total_df = total_df.append(tdf)
-        print(f'{days} 완료')
+    total_kospi_df = get_total_df('kospi')
+    append_trend_analysis(total_kospi_df, 'kospi')
 
-    total_df.to_csv(CSV_TODAY_TREND_ANALYSIS, encoding='utf-8', index=None)
+    total_kosdaq_df = get_total_df('kosdaq')
+    append_trend_analysis(total_kosdaq_df, 'kosdaq')
