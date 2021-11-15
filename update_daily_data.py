@@ -77,7 +77,10 @@ def get_total_trade_data_kospi(kiwoom, code, recent_df, today_checklist, i):
     global API_COUNT
 
     print('기존 데이터와 신규 데이터가 달라서 다시 다운받기 시작')
-    while kiwoom.tr_remained:    
+    while kiwoom.tr_remained:
+        if API_COUNT >= 999:
+            raise Exception("API Limit Exceed!")
+
         temp_df = get_stock_trade_data_until_now(kiwoom, 
                                                 code,
                                                 kiwoom.GetMasterCodeName(code), 
@@ -112,7 +115,10 @@ def get_total_trade_data_kosdaq(kiwoom, code, recent_df, today_checklist, i):
     global API_COUNT
 
     print('기존 데이터와 신규 데이터가 달라서 다시 다운받기 시작')
-    while kiwoom.tr_remained:    
+    while kiwoom.tr_remained:
+        if API_COUNT >= 999:
+            raise Exception("API Limit Exceed!")
+
         temp_df = get_stock_trade_data_until_now(kiwoom, 
                                                 code,
                                                 kiwoom.GetMasterCodeName(code), 
@@ -148,6 +154,9 @@ def iter_kospi(kiwoom, today_checklist, kospi_code_list_until_now, kospi_not_yet
     global API_COUNT
 
     for i, kcwh in enumerate(kospi_not_yet):
+        if API_COUNT >= 999:
+            raise Exception("API Limit Exceed!")
+
         code = kcwh
         name = kiwoom.GetMasterCodeName(code)
         print(f'{name}({code}) => 처리시작', end=' ')
@@ -157,7 +166,12 @@ def iter_kospi(kiwoom, today_checklist, kospi_code_list_until_now, kospi_not_yet
         min_date = pre_df['날짜'].min()
             
         if max_date == pd.Timestamp(TODAY):
-            print(f'오늘 날짜까지 업데이트 완료된 상태')
+            print(f'오늘 날짜까지 업데이트 완료된 상태', end=' ')
+            today_checklist.loc[today_checklist['종목코드'] == code, '일봉관리여부'] = True
+            today_checklist.loc[today_checklist['종목코드'] == code, '일봉최종수정일'] = TODAY
+            today_checklist.loc[today_checklist['종목코드'] == code, '일봉최근날짜'] = max_date.strftime("%Y%m%d")
+
+            print(f'today_checklist에 업데이트 완료 {i+1}/{kospi_cnt_not_yet} ({API_COUNT})')
             continue
         
         if min_date < datetime(2010, 1, 1):
@@ -197,7 +211,7 @@ def iter_kospi(kiwoom, today_checklist, kospi_code_list_until_now, kospi_not_yet
             pre_df = (pre_df.append(lastest_df, ignore_index=True)
                               .sort_values(by=['날짜'], ascending=False)
                               .reset_index(drop=True))
-                              
+
             pre_df.to_csv(DIR_KOSPI_DAILY + f'\\{code}.csv', encoding='utf-8', index=None)
             print('업데이트 및 저장 완료', end=' ')
 
@@ -212,6 +226,9 @@ def iter_kosdaq(kiwoom, today_checklist, kosdaq_code_list_until_now, kosdaq_not_
     global API_COUNT
 
     for i, kcwh in enumerate(kosdaq_not_yet):
+        if API_COUNT >= 999:
+            raise Exception('API Limit Exceed!')
+
         code = kcwh
         name = kiwoom.GetMasterCodeName(code)
         print(f'{name}({code}) => 처리시작', end=' ')
@@ -221,7 +238,12 @@ def iter_kosdaq(kiwoom, today_checklist, kosdaq_code_list_until_now, kosdaq_not_
         min_date = pre_df['날짜'].min()
             
         if max_date == pd.Timestamp(TODAY):
-            print(f'오늘 날짜까지 업데이트 완료된 상태')
+            print(f'오늘 날짜까지 업데이트 완료된 상태', end=' ')
+            today_checklist.loc[today_checklist['종목코드'] == code, '일봉관리여부'] = True
+            today_checklist.loc[today_checklist['종목코드'] == code, '일봉최종수정일'] = TODAY
+            today_checklist.loc[today_checklist['종목코드'] == code, '일봉최근날짜'] = max_date.strftime("%Y%m%d")
+
+            print(f'today_checklist에 업데이트 완료 {i+1}/{kospi_cnt_not_yet} ({API_COUNT})')
             continue
         
         if min_date < datetime(2010, 1, 1):
@@ -280,12 +302,26 @@ def iter_daily_data(kiwoom):
     kospi_code_list_until_now = kiwoom.GetCodeListByMarket('0')
     kosdaq_code_list_until_now = kiwoom.GetCodeListByMarket('10')
 
-    iter_kospi(kiwoom, today_checklist, kospi_code_list_until_now, kospi_not_yet)
-    print('코스피 목록 완료')
-    iter_kosdaq(kiwoom, today_checklist, kosdaq_code_list_until_now, kosdaq_not_yet)
-    print('코스닥 목록 완료')
+    try:
+        iter_kospi(kiwoom, today_checklist, kospi_code_list_until_now, kospi_not_yet)
+    except Exception as m:
+        print(m)
+    else:    
+        print('코스피 목록 완료')
+    finally:
+        today_checklist.to_csv(CSV_TODAY_CHECKLIST, encoding='utf-8', index=None)
 
-    today_checklist.to_csv(CSV_TODAY_CHECKLIST, encoding='utf-8', index=None)
+    today_checklist = pd.read_csv(CSV_TODAY_CHECKLIST, encoding='utf-8', dtype=CHECKLIST_DTYPE)
+    today_checklist['일봉최근날짜'] = today_checklist['일봉최근날짜'].astype('object')
+    try:
+        iter_kosdaq(kiwoom, today_checklist, kosdaq_code_list_until_now, kosdaq_not_yet)
+    except Exception as m:
+        print(m)
+    else:
+        print('코스닥 목록 완료')
+    finally:
+        today_checklist.to_csv(CSV_TODAY_CHECKLIST, encoding='utf-8', index=None)
+
     print('today_checklist 업데이트 완료')
 
 
