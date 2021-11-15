@@ -44,19 +44,25 @@ def check_df(old, new):
         if (new[(new['날짜'] >= old['날짜'].min()) & (new['날짜'] <= old['날짜'].max())]
             .reset_index(drop=True)
             .equals(old)):
+
             return False
+
     elif new_rows == old_rows:
         if (new[(new['날짜'] > old['날짜'].min()) & (new['날짜'] <= old['날짜'].max())]
             .reset_index(drop=True)
             .equals(old)):
+
             return False
+
     else:
         if (new[new['날짜'] <= old['날짜'].max()]
             .reset_index(drop=True)
             .equals(old[old['날짜'] >= new['날짜'].min()]
                     .reset_index(drop=True))
             ):
+
             return False
+            
     return True
 
 def get_total_trade_data_kospi(kiwoom, code, recent_df, today_checklist, i):
@@ -88,7 +94,7 @@ def get_total_trade_data_kospi(kiwoom, code, recent_df, today_checklist, i):
 
     today_checklist.loc[today_checklist['종목코드'] == code, '일봉관리여부'] = True
     today_checklist.loc[today_checklist['종목코드'] == code, '일봉최종수정일'] = TODAY
-    print(f'today_checklist에 업데이트 완료 {i+1}/{kospi_cnt_we_have} ({API_COUNT})')
+    print(f'today_checklist에 업데이트 완료 {i+1}/{kospi_cnt_not_yet} ({API_COUNT})')
 
 def get_total_trade_data_kosdaq(kiwoom, code, recent_df, today_checklist, i):
     global API_COUNT
@@ -119,7 +125,7 @@ def get_total_trade_data_kosdaq(kiwoom, code, recent_df, today_checklist, i):
 
     today_checklist.loc[today_checklist['종목코드'] == code, '일봉관리여부'] = True
     today_checklist.loc[today_checklist['종목코드'] == code, '일봉최종수정일'] = TODAY
-    print(f'today_checklist에 업데이트 완료 {i+1}/{kosdaq_cnt_we_have} ({API_COUNT})')
+    print(f'today_checklist에 업데이트 완료 {i+1}/{kosdaq_cnt_not_yet} ({API_COUNT})')
     
 
 def iter_kospi(kiwoom, today_checklist, kospi_code_list_until_now, kospi_not_yet):
@@ -181,7 +187,7 @@ def iter_kospi(kiwoom, today_checklist, kospi_code_list_until_now, kospi_not_yet
 
             today_checklist.loc[today_checklist['종목코드'] == code, '일봉관리여부'] = True
             today_checklist.loc[today_checklist['종목코드'] == code, '일봉최종수정일'] = TODAY
-            print(f'today_checklist에 업데이트 완료 {i+1}/{kospi_cnt_we_have} ({API_COUNT})')
+            print(f'today_checklist에 업데이트 완료 {i+1}/{kospi_cnt_not_yet} ({API_COUNT})')
 
 
 def iter_kosdaq(kiwoom, today_checklist, kosdaq_code_list_until_now, kosdaq_not_yet):
@@ -243,7 +249,7 @@ def iter_kosdaq(kiwoom, today_checklist, kosdaq_code_list_until_now, kosdaq_not_
 
             today_checklist.loc[today_checklist['종목코드'] == code, '일봉관리여부'] = True
             today_checklist.loc[today_checklist['종목코드'] == code, '일봉최종수정일'] = TODAY
-            print(f'today_checklist에 업데이트 완료 {i+1}/{kosdaq_cnt_we_have} ({API_COUNT})')
+            print(f'today_checklist에 업데이트 완료 {i+1}/{kosdaq_cnt_not_yet} ({API_COUNT})')
             
 
 def iter_daily_data(kiwoom):
