@@ -78,3 +78,5 @@ kosdaq_code_list_we_have = [i[:-4] for i in os.listdir(DIR_KOSDAQ_DAILY) if i.en
 total_code_list_we_have = kospi_code_list_we_have + kosdaq_code_list_we_have
 kospi_cnt_we_have = len(kospi_code_list_we_have)
 kosdaq_cnt_we_have = len(kosdaq_code_list_we_have)
+
+lastest_checklist = pd.read_csv(CSV_LASTEST_CHECKLIST, encoding='utf-8', dtype=CHECKLIST_DTYPE)
