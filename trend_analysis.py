@@ -94,6 +94,8 @@ def get_total_df(market):
     total_df['종목명'] = total_df['종목명'].astype('category')
     total_df = total_df.sort_values(by=['종목코드', '날짜']).reset_index(drop=True)
 
+    total_df.to_feather(PWD + f'\\data\\total_{market}_data_{TODAY}.arrx')
+
     return total_df
 
 def append_trend_analysis(total_df, market):
@@ -133,8 +135,11 @@ def append_trend_analysis(total_df, market):
     time.sleep(2)
 
 def run_trend_analysis():
-    total_kospi_df = get_total_df('kospi')
+    total_kospi_df = get_total_df('kospi') if not os.path.isfile(ARR_KOSPI_TOTAL_DATA) else pd.read_feather(ARR_KOSPI_TOTAL_DATA)
     append_trend_analysis(total_kospi_df, 'kospi')
 
-    total_kosdaq_df = get_total_df('kosdaq')
+    total_kosdaq_df = get_total_df('kosdaq') if not os.path.isfile(ARR_KOSDAQ_TOTAL_DATA) else pd.read_feather(ARR_KOSDAQ_TOTAL_DATA)
     append_trend_analysis(total_kosdaq_df, 'kosdaq')
+
+if __name__ == "__main__":
+    run_trend_analysis()

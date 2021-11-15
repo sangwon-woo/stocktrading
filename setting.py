@@ -33,6 +33,9 @@ CSV_LASTEST_CHECKLIST = PWD + f'\\data\\past_checklist\\{csv_lastest_checklist}'
 CSV_KOSPI_TREND_ANALYSIS = PWD + f'\\data\\trend_analysis\\kospi_trend_analysis_{TODAY}.csv'
 CSV_KOSDAQ_TREND_ANALYSIS = PWD + f'\\data\\trend_analysis\\kosdaq_trend_analysis_{TODAY}.csv'
 
+ARR_KOSPI_TOTAL_DATA = PWD + f'\\data\\total_kospi_data_{TODAY}.arrx'
+ARR_KOSDAQ_TOTAL_DATA = PWD + f'\\data\\total_kosdaq_data_{TODAY}.arrx'
+
 CHECKLIST_DTYPE ={
     '시장명' : 'category',
     '종목명' : 'category',
