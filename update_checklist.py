@@ -69,8 +69,7 @@ def iter_checklist(today_checklist):
             stock_df = pd.read_csv(DIR_KOSPI_DAILY + f'\\{code}.csv', encoding='utf-8', dtype=TRADEDATA_DTYPE, parse_dates=['날짜'])
             min_date = stock_df['날짜'].min().strftime('%Y%m%d')
             max_date = stock_df['날짜'].max().strftime('%Y%m%d')
-            today_checklist.loc[today_checklist['종목코드'] == code, '일봉관리여부'] = True
-            today_checklist.loc[today_checklist['종목코드'] == code, '일봉최종수정일'] = TODAY
+            today_checklist.loc[today_checklist['종목코드'] == code, '일봉관리여부'] = False
             today_checklist.loc[today_checklist['종목코드'] == code, '일봉최초날짜'] = min_date
             today_checklist.loc[today_checklist['종목코드'] == code, '일봉최근날짜'] = max_date
 
@@ -80,8 +79,7 @@ def iter_checklist(today_checklist):
             stock_df = pd.read_csv(DIR_KOSDAQ_DAILY + f'\\{code}.csv', encoding='utf-8', dtype=TRADEDATA_DTYPE, parse_dates=['날짜'])
             min_date = stock_df['날짜'].min().strftime('%Y%m%d')
             max_date = stock_df['날짜'].max().strftime('%Y%m%d')
-            today_checklist.loc[today_checklist['종목코드'] == code, '일봉관리여부'] = True
-            today_checklist.loc[today_checklist['종목코드'] == code, '일봉최종수정일'] = TODAY
+            today_checklist.loc[today_checklist['종목코드'] == code, '일봉관리여부'] = False
             today_checklist.loc[today_checklist['종목코드'] == code, '일봉최초날짜'] = min_date
             today_checklist.loc[today_checklist['종목코드'] == code, '일봉최근날짜'] = max_date
 
