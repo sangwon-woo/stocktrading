@@ -16,6 +16,7 @@ import numpy as np
 from pykiwoom.kiwoom import *
 from setting import *
 from datetime import datetime
+import pprint
 
 def get_stock_trade_data_until_now(kiwoom, code, name, today, STOCK_ITEM_DTYPE, TRADEDATA_DTYPE, next=0):
     
@@ -276,7 +277,7 @@ def iter_kosdaq(kiwoom, today_checklist, kosdaq_code_list_until_now, kosdaq_not_
             get_total_trade_data_kosdaq(kiwoom, code, recent_df, today_checklist, i)
             continue
 
-        lastest_df = recent_df[recent_df['날짜'] > max_date]
+        lastest_df = recent_df[recent_df['날짜'] >= max_date]
 
         if lastest_df.shape[0]:
             print(f'오늘까지의 데이터에 비해 {lastest_df.shape[0]}일치 부족', end=' ')
