@@ -280,7 +280,7 @@ def iter_kosdaq(kiwoom, today_checklist, kosdaq_code_list_until_now, kosdaq_not_
         lastest_df = recent_df[recent_df['날짜'] >= max_date]
 
         if lastest_df.shape[0]:
-            print(f'오늘까지의 데이터에 비해 {lastest_df.shape[0]}일치 부족', end=' ')
+            print(f'오늘까지의 데이터에 비해 {lastest_df.shape[0]-1}일치 부족', end=' ')
 
             pre_df = (pre_df.iloc[1:, :].append(lastest_df, ignore_index=True)
                               .sort_values(by=['날짜'], ascending=False)
