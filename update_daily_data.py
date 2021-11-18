@@ -208,7 +208,7 @@ def iter_kospi(kiwoom, today_checklist, kospi_code_list_until_now, kospi_not_yet
         time.sleep(0.7)
         API_COUNT += 1
 
-        if not recent_df:
+        if type(recent_df) == type(None):
             if code in kospi_code_list_until_now:
                 print(f'현재까지 코스피에서 거래중이지만 새로운 데이터가 없으므로 상장폐지 폴더로 이동', end=' ')
                 move_stock_data_to_delisting(code, file_dir)
@@ -288,7 +288,7 @@ def iter_kosdaq(kiwoom, today_checklist, kosdaq_code_list_until_now, kosdaq_not_
         time.sleep(0.7)
         API_COUNT += 1
 
-        if not recent_df:
+        if type(recent_df) == type(None):
             if code in kosdaq_code_list_until_now:
                 print(f'현재까지 코스닥에서 거래중이지만 새로운 데이터가 없으므로 상장폐지 폴더로 이동', end=' ')
                 move_stock_data_to_delisting(code, file_dir)
