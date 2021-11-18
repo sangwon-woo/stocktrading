@@ -17,6 +17,7 @@ from pykiwoom.kiwoom import *
 from setting import *
 from datetime import datetime
 import pprint
+import shutil
 
 def get_stock_trade_data_until_now(kiwoom, code, name, today, STOCK_ITEM_DTYPE, TRADEDATA_DTYPE, next=0):
     
@@ -185,8 +186,11 @@ def iter_kospi(kiwoom, today_checklist, kospi_code_list_until_now, kospi_not_yet
             print(f'현재까지 코스피에서 거래중', end=' ')
         else:
             print(f'현재 코스피에서 거래 안됨', end=' ')
-            if os.path.isfile(DIR_KOSPI_DAILY+f'\\{code}.csv'):
-                os.remove(DIR_KOSPI_DAILY+f'\\{code}.csv')
+            file_dir = DIR_KOSPI_DAILY+f'\\{code}.csv'
+            to_dir = PWD + f'\\data\\delisting\\'
+            if os.path.isfile(file_dir):
+                shutil.copy2(file_dir, to_dir)
+                os.remove(file_dir)
                 print(f'{code} 제거 완료')
             
             continue
@@ -255,11 +259,14 @@ def iter_kosdaq(kiwoom, today_checklist, kosdaq_code_list_until_now, kosdaq_not_
         print(f"기존 데이터는 {str(min_date)[:10]}부터 {str(max_date)[:10]}까지 존재", end=' ')
         
         if code in kosdaq_code_list_until_now:
-            print(f'현재까지 코스닥에서 거래중', end=' ')
+            print(f'현재까지 코스피에서 거래중', end=' ')
         else:
-            print(f'현재 코스닥에서 거래 안됨', end=' ')
-            if os.path.isfile(DIR_KOSPI_DAILY+f'\\{code}.csv'):
-                os.remove(DIR_KOSPI_DAILY+f'\\{code}.csv')
+            print(f'현재 코스피에서 거래 안됨', end=' ')
+            file_dir = DIR_KOSDAQ_DAILY+f'\\{code}.csv'
+            to_dir = PWD + f'\\data\\delisting\\'
+            if os.path.isfile(file_dir):
+                shutil.copy2(file_dir, to_dir)
+                os.remove(file_dir)
                 print(f'{code} 제거 완료')
             
             continue
