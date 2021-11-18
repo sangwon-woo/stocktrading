@@ -27,6 +27,8 @@ def get_stock_trade_data_until_now(kiwoom, code, name, today, STOCK_ITEM_DTYPE, 
                                     수정주가구분=1, 
                                     output='주식일봉차트조회',
                                     next=next)
+    if recent_df.sum().sum() == code:
+        return None
 
     recent_df = recent_df.rename(columns=STOCK_ITEM_DTYPE)
     recent_df['날짜'] = pd.to_datetime(recent_df['날짜'])
@@ -74,6 +76,14 @@ def check_df(old, new):
             return False
             
     return True
+
+def move_stock_data_to_delisting(code):
+    file_dir = DIR_KOSDAQ_DAILY+f'\\{code}.csv'
+    to_dir = PWD + f'\\data\\delisting\\'
+    if os.path.isfile(file_dir):
+        shutil.copy2(file_dir, to_dir)
+        os.remove(file_dir)
+        print(f'{code} 제거 완료')
 
 def get_total_trade_data_kospi(kiwoom, code, recent_df, today_checklist, i):
     global API_COUNT
@@ -182,19 +192,6 @@ def iter_kospi(kiwoom, today_checklist, kospi_code_list_until_now, kospi_not_yet
         
         print(f"기존 데이터는 {str(min_date)[:10]}부터 {str(max_date)[:10]}까지 존재", end=' ')
         
-        if code in kospi_code_list_until_now:
-            print(f'현재까지 코스피에서 거래중', end=' ')
-        else:
-            print(f'현재 코스피에서 거래 안됨', end=' ')
-            file_dir = DIR_KOSPI_DAILY+f'\\{code}.csv'
-            to_dir = PWD + f'\\data\\delisting\\'
-            if os.path.isfile(file_dir):
-                shutil.copy2(file_dir, to_dir)
-                os.remove(file_dir)
-                print(f'{code} 제거 완료')
-            
-            continue
-
         recent_df = get_stock_trade_data_until_now(kiwoom,
                                                     code, 
                                                     name, 
@@ -203,6 +200,16 @@ def iter_kospi(kiwoom, today_checklist, kospi_code_list_until_now, kospi_not_yet
                                                     TRADEDATA_DTYPE)
         time.sleep(0.7)
         API_COUNT += 1
+
+        if not recent_df:
+            if code in kospi_code_list_until_now:
+                print(f'현재까지 코스피에서 거래중이지만 새로운 데이터가 없으므로 상장폐지 폴더로 이동', end=' ')
+                move_stock_data_to_delisting(code)
+            else:
+                print(f'현재 코스피에서 거래 안되므로 상장폐지 폴더로 이동', end=' ')
+                move_stock_data_to_delisting(code)
+
+                continue
 
         if check_df(pre_df, recent_df):
             get_total_trade_data_kospi(kiwoom, code, recent_df, today_checklist, i)
@@ -248,7 +255,7 @@ def iter_kosdaq(kiwoom, today_checklist, kosdaq_code_list_until_now, kosdaq_not_
             today_checklist.loc[today_checklist['종목코드'] == code, '일봉최종수정일'] = TODAY
             today_checklist.loc[today_checklist['종목코드'] == code, '일봉최근날짜'] = max_date.strftime("%Y%m%d")
 
-            print(f'today_checklist에 업데이트 완료 {i+1}/{kospi_cnt_not_yet} ({API_COUNT})')
+            print(f'today_checklist에 업데이트 완료 {i+1}/{kosdaq_cnt_not_yet} ({API_COUNT})')
             continue
         
         if min_date < datetime(2010, 1, 1):
@@ -258,19 +265,6 @@ def iter_kosdaq(kiwoom, today_checklist, kosdaq_code_list_until_now, kosdaq_not_
         
         print(f"기존 데이터는 {str(min_date)[:10]}부터 {str(max_date)[:10]}까지 존재", end=' ')
         
-        if code in kosdaq_code_list_until_now:
-            print(f'현재까지 코스피에서 거래중', end=' ')
-        else:
-            print(f'현재 코스피에서 거래 안됨', end=' ')
-            file_dir = DIR_KOSDAQ_DAILY+f'\\{code}.csv'
-            to_dir = PWD + f'\\data\\delisting\\'
-            if os.path.isfile(file_dir):
-                shutil.copy2(file_dir, to_dir)
-                os.remove(file_dir)
-                print(f'{code} 제거 완료')
-            
-            continue
-
         recent_df = get_stock_trade_data_until_now(kiwoom,
                                                     code, 
                                                     name, 
@@ -279,6 +273,16 @@ def iter_kosdaq(kiwoom, today_checklist, kosdaq_code_list_until_now, kosdaq_not_
                                                     TRADEDATA_DTYPE)
         time.sleep(0.7)
         API_COUNT += 1
+
+        if not recent_df:
+            if code in kosdaq_code_list_until_now:
+                print(f'현재까지 코스닥에서 거래중이지만 새로운 데이터가 없으므로 상장폐지 폴더로 이동', end=' ')
+                move_stock_data_to_delisting(code)
+            else:
+                print(f'현재 코스닥에서 거래 안되므로 상장폐지 폴더로 이동', end=' ')
+                move_stock_data_to_delisting(code)
+
+                continue
         
         if check_df(pre_df, recent_df):
             get_total_trade_data_kosdaq(kiwoom, code, recent_df, today_checklist, i)
