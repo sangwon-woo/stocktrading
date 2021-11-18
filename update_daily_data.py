@@ -77,9 +77,9 @@ def check_df(old, new):
             
     return True
 
-def move_stock_data_to_delisting(code):
-    file_dir = DIR_KOSDAQ_DAILY+f'\\{code}.csv'
+def move_stock_data_to_delisting(code, file_dir):
     to_dir = PWD + f'\\data\\delisting\\'
+
     if os.path.isfile(file_dir):
         shutil.copy2(file_dir, to_dir)
         os.remove(file_dir)
@@ -172,7 +172,14 @@ def iter_kospi(kiwoom, today_checklist, kospi_code_list_until_now, kospi_not_yet
         code = kcwh
         name = kiwoom.GetMasterCodeName(code)
         print(f'{name}({code}) => 처리시작', end=' ')
-        pre_df = pd.read_csv(DIR_KOSPI_DAILY + f'\\{code}.csv', encoding='utf-8', dtype=TRADEDATA_DTYPE, parse_dates=['날짜'])
+
+        file_dir = DIR_KOSPI_DAILY + f'\\{code}.csv'
+        
+        if os.path.isfile(file_dir):
+            pre_df = pd.read_csv(file_dir, encoding='utf-8', dtype=TRADEDATA_DTYPE, parse_dates=['날짜'])
+        else:
+            print('상장폐지된 종목이므로 종료')
+            continue
         
         max_date = pre_df['날짜'].max()
         min_date = pre_df['날짜'].min()
@@ -204,10 +211,10 @@ def iter_kospi(kiwoom, today_checklist, kospi_code_list_until_now, kospi_not_yet
         if not recent_df:
             if code in kospi_code_list_until_now:
                 print(f'현재까지 코스피에서 거래중이지만 새로운 데이터가 없으므로 상장폐지 폴더로 이동', end=' ')
-                move_stock_data_to_delisting(code)
+                move_stock_data_to_delisting(code, file_dir)
             else:
                 print(f'현재 코스피에서 거래 안되므로 상장폐지 폴더로 이동', end=' ')
-                move_stock_data_to_delisting(code)
+                move_stock_data_to_delisting(code, file_dir)
 
                 continue
 
@@ -224,7 +231,7 @@ def iter_kospi(kiwoom, today_checklist, kospi_code_list_until_now, kospi_not_yet
                               .sort_values(by=['날짜'], ascending=False)
                               .reset_index(drop=True))
 
-            pre_df.to_csv(DIR_KOSPI_DAILY + f'\\{code}.csv', encoding='utf-8', index=None)
+            pre_df.to_csv(file_dir, encoding='utf-8', index=None)
             print('업데이트 및 저장 완료', end=' ')
 
             today_checklist.loc[today_checklist['종목코드'] == code, '일봉관리여부'] = True
@@ -244,8 +251,15 @@ def iter_kosdaq(kiwoom, today_checklist, kosdaq_code_list_until_now, kosdaq_not_
         code = kcwh
         name = kiwoom.GetMasterCodeName(code)
         print(f'{name}({code}) => 처리시작', end=' ')
-        pre_df = pd.read_csv(DIR_KOSDAQ_DAILY + f'\\{code}.csv', encoding='utf-8', dtype=TRADEDATA_DTYPE, parse_dates=['날짜'])
         
+        file_dir = DIR_KOSDAQ_DAILY + f'\\{code}.csv'
+        
+        if os.path.isfile(file_dir):
+            pre_df = pd.read_csv(file_dir, encoding='utf-8', dtype=TRADEDATA_DTYPE, parse_dates=['날짜'])
+        else:
+            print('상장폐지된 종목이므로 종료')
+            continue
+
         max_date = pre_df['날짜'].max()
         min_date = pre_df['날짜'].min()
             
@@ -277,10 +291,10 @@ def iter_kosdaq(kiwoom, today_checklist, kosdaq_code_list_until_now, kosdaq_not_
         if not recent_df:
             if code in kosdaq_code_list_until_now:
                 print(f'현재까지 코스닥에서 거래중이지만 새로운 데이터가 없으므로 상장폐지 폴더로 이동', end=' ')
-                move_stock_data_to_delisting(code)
+                move_stock_data_to_delisting(code, file_dir)
             else:
                 print(f'현재 코스닥에서 거래 안되므로 상장폐지 폴더로 이동', end=' ')
-                move_stock_data_to_delisting(code)
+                move_stock_data_to_delisting(code, file_dir)
 
                 continue
         
@@ -296,7 +310,7 @@ def iter_kosdaq(kiwoom, today_checklist, kosdaq_code_list_until_now, kosdaq_not_
             pre_df = (pre_df.iloc[1:, :].append(lastest_df, ignore_index=True)
                               .sort_values(by=['날짜'], ascending=False)
                               .reset_index(drop=True))
-            pre_df.to_csv(DIR_KOSDAQ_DAILY + f'\\{code}.csv', encoding='utf-8', index=None)
+            pre_df.to_csv(file_dir, encoding='utf-8', index=None)
             print('업데이트 및 저장 완료', end=' ')
 
             today_checklist.loc[today_checklist['종목코드'] == code, '일봉관리여부'] = True
