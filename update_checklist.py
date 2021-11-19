@@ -13,6 +13,7 @@ import pandas as pd
 from pykiwoom.kiwoom import *
 from setting import *
 from update_daily_data import get_stock_trade_data_until_now
+import pprint
 
 
 def init_checklist(kiwoom):
@@ -102,6 +103,9 @@ def save_new_stock_data(not_tracked_list, kiwoom):
         API_COUNT += 1
         market = not_tracked_list[not_tracked_list['종목코드'] == code].values[0][0]
 
+        if type(first_df) == type(None):
+            return
+
         while kiwoom.tr_remained:
 
             temp_df = get_stock_trade_data_until_now(kiwoom, 
@@ -141,7 +145,7 @@ def update_checklist(kiwoom):
     not_tracked_list = today_checklist[today_checklist['일봉관리여부'] == False]
 
     if not_tracked_list.shape[0]:
-        print(not_tracked_list)
+        pprint(not_tracked_list)
 
         save_new_stock_data(not_tracked_list, kiwoom)
     else:
