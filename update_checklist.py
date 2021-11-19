@@ -145,7 +145,7 @@ def update_checklist(kiwoom):
     not_tracked_list = today_checklist[today_checklist['일봉관리여부'] == False]
 
     if not_tracked_list.shape[0]:
-        pprint(not_tracked_list)
+        print(not_tracked_list)
 
         save_new_stock_data(not_tracked_list, kiwoom)
     else:
