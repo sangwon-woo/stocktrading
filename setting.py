@@ -5,15 +5,18 @@ import pandas as pd
 
 
 def get_today(today):
-    today_idx = today.weekday()
-    if today_idx in [0,1,2,3,4]:
+    today_weekday = today.weekday()
+    today_hour = today.hour
+
+    if today_weekday == 5:
+        return (today - timedelta(days=1)).date().strftime("%Y%m%d")
+    elif today_weekday == 6:
+        return (today - timedelta(days=2)).date().strftime("%Y%m%d")
+
+    if today_hour >= 16 and today_hour < 24:
         return today.date().strftime('%Y%m%d')
     else:
-        if today_idx == 5:
-            return (today - timedelta(days=1)).date().strftime("%Y%m%d")
-        elif today_idx == 6:
-            return (today - timedelta(days=2)).date().strftime("%Y%m%d")
-
+        return (today - timedelta(days=1)).date().strftime("%Y%m%d")
 
 
 PWD = os.getcwd()
