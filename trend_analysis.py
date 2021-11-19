@@ -142,4 +142,7 @@ def run_trend_analysis():
     append_trend_analysis(total_kosdaq_df, 'kosdaq')
 
 if __name__ == "__main__":
+    start = time.time()
     run_trend_analysis()
+    end = time.time()
+    print(f'총 걸린 시간 : {(end-start) / 60:.2f}분')
