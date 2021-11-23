@@ -104,6 +104,55 @@ kospi_code_list = self.kiwoom.dynamicCall("GetCodeListByMarket(QString)", ["0"])
 item_name = self.kiwoom.dynamicCall("GetMasterCodeName(QString)", ["005680"])
 ```
 
+#### SendOrder
+"매수, 매도 하는 함수"
+
+    참고! 
+    * sRQName : 주문요청시 요청을 구분짓기 위한 요청 이름. TR의 요청 이름과 같은 역할
+    * sScreenNo : 스크린 번호
+    * sAccNo : 계좌번호
+    * nOrderType : 주문유형. 1은 신규매수이며 일반적인 매수. 2는 신규매도이며 일반적인 매도. 3은 매수취소, 4는 매도취소, 5는 매수주문 넣었던 종목이 체결되지 않아 다른 가격대로 다시 넣는 정정주문. 6도 마찬가지
+    * sCode : 주문넣는 종목코드
+    * nQty : 매매할 수량
+    * nPrice : 주문 넣을 가격
+    * sHogaGb : 00은 지정가, 03은 시장가. 만약 시장가로 주문을 넣으려면 nPrice는 빈값
+    * sOrgOrderNo : 주문이 들어가면 해당 주문에 대해 고유한 주문번호가 부여됨. 신규주문을 요청할 때는 주문번호가 없기 때문에 빈값. 이후에 주문취소 및 정정주문에서는 주문번호 필요. 
+
+```python
+self.dynamicCall("SendOrder(QString, QString, QString, int, QString, int, int, QString, QString)",
+                "신규매수",
+                self.portfolio_stock_dict[sCode]['주문용스크린번호'],
+                self.account_num,
+                1, # 매수는 1
+                sScode, # 매수할 종목코드
+                quantity, # 매수수량
+                e, # 매수가격. 지정가이기 때문에 0이 아님
+                self.realType.SENDTYPE['거래구분']['지정가'], # 호가구분. 00은 지정가, 03은 시장가
+                '' # 주문번호. 신규매수는 주문번호가 없음)
+
+self.dynamicCall("SendOrder(QString, QString, QString, int, QString, int, int, QString, QString)",
+                "매수취소",
+                self.portfolio_stock_dict[sCode]['주문용스크린번호'],
+                self.account_num,
+                3, # 매수취소는 3
+                sScode, # 매수할 종목코드
+                0, # 매수취소수량. 0은 미체결수량 전부를 매수취소한다는 뜻. 
+                0, # 매수취소라서 주문가격은 필요없으므로 0
+                self.realType.SENDTYPE['거래구분']['지정가'], # 호가구분. 00은 지정가, 03은 시장가
+                order_num # 주문번호)
+
+self.dynamicCall("SendOrder(QString, QString, QString, int, QString, int, int, QString, QString)",
+                "신규매도",
+                self.portfolio_stock_dict[sCode]['주문용스크린번호'],
+                self.account_num,
+                2, # 매도는 2
+                sScode, # 매도할 종목코드
+                jd['주문가능수량'], # 매도수량
+                0, # 매도가격. 시장가이기 때문에 0
+                self.realType.SENDTYPE['거래구분']['시장가'],
+                '' # 주문번호. 신규매도는 주문번호가 없음)
+```
+
 ### 3. Event 처리 함수
 #### OnEventConnect()
 "로그인 이벤트 처리"
@@ -117,6 +166,9 @@ def event_connect(self, err_code):
 #### OnReceiveTrData()
 "서버통신 후 데이터를 받은 시점을 알려줌"
 ```python
+self.dynamicCall("SetInputValue(변수명들)", 변수데이터들)
+self.dynamicCall("CommRqData(변수명들)", 변수데이터들)
+
 self.kiwoom.OnReceiveTrData.connect(self.receive_trdata)
 
 def receive_trdata(self, screen_no, rqname, trcode, recordname, prev_next, data_len, err_code, msg1, msg2):
@@ -134,11 +186,39 @@ def receive_trdata(self, screen_no, rqname, trcode, recordname, prev_next, data_
 * msg1 : 사용안함
 * msg2 : 사용안함
 
+#### OnReceiveRealData()
+"실시간 데이터를 받음"
+
+```python
+self.dynamicCall('SetRealReg(변수명들)', 변수데이터들)
+
+self.kiwoom.OnReceiveRealData.connect(self.realdata_slot)
+
+def realdata_slot(self, sCode, sRealType, sRealData):
+    if sRealType == "장시작시간":
+        pass
+```
+
+#### OnReceiveChejanData()
+"실시간 체결정보를 받음"
+
+```python
+self.dynamicCall('SendOrder(변수명들)', 변수데이터들)
+
+self.kiwoom.OnReceiveChejanData.connect(self.chejan_slot)
+
+def chejan_slot(self, sGubun, nItemCnt, sFidList):
+    if int(sGubun) == 0: # 주문체결
+        pass
+    elif int(sGubun) == 1: # 잔고
+        pass
+```
+
 
 ### 4. 트랜잭션
 #### 예수금 정보 가져오기 => opw00001
 ```python
-self.screen_my_info = 2000
+self.screen_my_info = "2000"
 
 def detail_account_info(self, sPrevNext="0"):
     self.dynamicCall("SetInputValue(QString, QString)", "계좌번호", self.account_num)
@@ -161,7 +241,7 @@ def stop_screen_cancel(self, sScrNo=None):
 
 #### 계좌평가잔고내역 정보 가져오기 => opw00018
 ```python
-self.screen_my_info = 2000
+self.screen_my_info = "2000"
 
 def detail_account_mystock(self, sPrevNext="0"):
     self.dynamicCall("SetInputValue(QString, QString)", "계좌번호", self.account_num)
@@ -225,4 +305,140 @@ def trdata_slot(self, sScrNo, sRQName, sTrCode, sRecordName, sPrevNext):
 def stop_screen_cancel(self, sScrNo=None):
     self.dynamicCall('DisconnectRealData(QString)', sScrNo)
 ```
+
+#### 미체결종목 가져오기 => opt10075
+```python
+self.not_account_stock_dict = {}
+
+def not_concluded_account(self, sPrevNext="0"):
+    print("미체결 종목 요청")
+    self.dynamicCall("SetInputValue(QString, QString)", "계좌번호", self.account_num)
+    self.dynamicCall("SetInputValue(QString, QString)", "체결구분", "1")
+    self.dynamicCall("SetInputValue(QString, QString)", "매매구분", "0")
+    self.dynamicCall("CommRqData(QString, QString, int, QString)", "실시간미체결요청", "opt10075", sPrevNext, self.screen_my_info)
+
+    self.detail_account_info_event_loop.exec_()
+
+self.OnReceiveTrData.connect(self.trdata_slot)
+
+def trdata_slot(self, sScrNo, sRQName, sTrCode, sRecordName, sPrevNext):
+    if sRQName == "실시간미체결요청":
+        rows = self.dynamicCall("GetRepeatCnt(QString, QString)", sTrCode, sRQName)
+
+        for i in range(rows):
+            code = self.dynamicCall("GetCommData(QString, QString, int, QString)", sTrCode, sRQName, i, "종목코드")
+
+            code_nm = self.dynamicCall("GetCommData(QString, QString, int, QString)", sTrCode, sRQName, i, "종목명")
+            order_no = self.dynamicCall("GetCommData(QString, QString, int, QString)", sTrCode, sRQName, i, "주문번호")
+            order_status = self.dynamicCall("GetCommData(QString, QString, int, QString)", sTrCode, sRQName, i, "주문상태") # 접수,확인,체결
+            order_quantity = self.dynamicCall("GetCommData(QString, QString, int, QString)", sTrCode, sRQName, i, "주문수량")
+            order_price = self.dynamicCall("GetCommData(QString, QString, int, QString)", sTrCode, sRQName, i, "주문가격")
+            order_gubun = self.dynamicCall("GetCommData(QString, QString, int, QString)", sTrCode, sRQName, i, "주문구분") # -매도, +매수, -매도정정, +매수정정
+            not_quantity = self.dynamicCall("GetCommData(QString, QString, int, QString)", sTrCode, sRQName, i, "미체결수량")
+            ok_quantity = self.dynamicCall("GetCommData(QString, QString, int, QString)", sTrCode, sRQName, i, "체결량")
+
+            code = code.strip()
+            code_nm = code_nm.strip()
+            order_no = int(order_no.strip())
+            order_status = order_status.strip()
+            order_quantity = int(order_quantity.strip())
+            order_price = int(order_price.strip())
+            order_gubun = order_gubun.strip().lstrip('+').lstrip('-')
+            not_quantity = int(not_quantity.strip())
+            ok_quantity = int(ok_quantity.strip())
+
+            if order_no in self.not_account_stock_dict:
+                pass
+            else:
+                self.not_account_stock_dict[order_no] = {}
+
+            self.not_account_stock_dict[order_no].update({'종목코드': code})
+            self.not_account_stock_dict[order_no].update({'종목명': code_nm})
+            self.not_account_stock_dict[order_no].update({'주문번호': order_no})
+            self.not_account_stock_dict[order_no].update({'주문상태': order_status})
+            self.not_account_stock_dict[order_no].update({'주문수량': order_quantity})
+            self.not_account_stock_dict[order_no].update({'주문가격': order_price})
+            self.not_account_stock_dict[order_no].update({'주문구분': order_gubun})
+            self.not_account_stock_dict[order_no].update({'미체결수량': not_quantity})
+            self.not_account_stock_dict[order_no].update({'체결량': ok_quantity})
+
+
+        self.detail_account_info_event_loop.exit()
+```
+    
+### 5. 실시간 데이터 가져오기
+#### SetRealReg(QString, QString, QString, QString)
+
+    * screen_num : 스크린 번호
+    * code : 종목 번호
+    * fids : FID
+    * 등록타입 : "0"은 새로운 실시간 요청을 할 때 사용, "1"은 실시간으로 받고 싶은 정보를 추가할 때 사용. 실시간 정보를 요청할 때 종목을 "0"으로 등록하면 이전에 등록된 실시간 연결은 모두 초기화되고 새롭게 등록됨. 
+
+```python
+self.dynamicCall("SetRealReg(QString, QString, QString, QString)",
+                self.screen_start_stop_real, # 스크린 번호
+                '', # 원래는 종목코드가 들어가지만 주식 장의 시간 상태를 실시간으로 받겠다는 뜻
+                self.realType.REALTYPE['장시작시간']['장운영구분'], # FID
+                '0')
+
+def real_event_slot(self):
+    self.OnReceiveRealData.connect(self.realdata_slot)
+
+def realdata_slot(self, sCode, sRealType, sRealData):
+    if sRealType == "장시작시간":
+        fid = self.realType.REALTYPE[sRealType]['장운영구분'] # (0:장시작전, 2:장종료전(20분), 3:장시작, 4,8:장종료(30분), 9:장마감)
+        value = self.dynamicCall("GetCommRealData(QString, int)", sCode, fid)
+
+        if value == '0':
+            print("장 시작 전")
+
+        elif value == '3':
+            print("장 시작")
+
+        elif value == "2":
+            print("장 종료, 동시호가로 넘어감")
+
+        elif value == "4":
+            print("3시30분 장 종료")
+```
+
+#### GetCommRealData(QString, int)
+실시간 데이터를 가져오는 함수
+
+    * code : 종목코드
+    * fid : FID
+
+```python
+
+for code in self.portfolio_stock_dict.keys():
+            screen_num = self.portfolio_stock_dict[code]['스크린번호']
+            fids = self.realType.REALTYPE['주식체결']['체결시간']
+            self.dynamicCall("SetRealReg(QString, QString, QString, QString)", 
+                            screen_num, # 스크린 번호
+                            code, # 종목 코드
+                            fids, # FID 
+                            "1" #등록타입)
+
+def realdata_slot(self, sCode, sRealType, sRealData):
+    if sRealType == "주식체결":
+        a = self.dynamicCall("GetCommRealData(QString, int)", sCode, self.realType.REALTYPE[sRealType]['체결시간']) # 출력 HHMMSS
+        b = self.dynamicCall("GetCommRealData(QString, int)", sCode, self.realType.REALTYPE[sRealType]['현재가']) # 출력 : +(-)2520
+        c = self.dynamicCall("GetCommRealData(QString, int)", sCode, self.realType.REALTYPE[sRealType]['전일대비']) # 출력 : +(-)2520
+        d = self.dynamicCall("GetCommRealData(QString, int)", sCode, self.realType.REALTYPE[sRealType]['등락율']) # 출력 : +(-)12.98
+        e = self.dynamicCall("GetCommRealData(QString, int)", sCode, self.realType.REALTYPE[sRealType]['(최우선)매도호가']) # 출력 : +(-)2520
+        f = self.dynamicCall("GetCommRealData(QString, int)", sCode, self.realType.REALTYPE[sRealType]['(최우선)매수호가']) # 출력 : +(-)2515
+        g = self.dynamicCall("GetCommRealData(QString, int)", sCode, self.realType.REALTYPE[sRealType]['거래량']) # 출력 : +240124 매수일때, -2034 매도일 때
+        h = self.dynamicCall("GetCommRealData(QString, int)", sCode, self.realType.REALTYPE[sRealType]['누적거래량']) # 출력 : 240124
+        i = self.dynamicCall("GetCommRealData(QString, int)", sCode, self.realType.REALTYPE[sRealType]['고가']) # 출력 : +(-)2530
+        j = self.dynamicCall("GetCommRealData(QString, int)", sCode, self.realType.REALTYPE[sRealType]['시가']) # 출력 : +(-)2530
+        k = self.dynamicCall("GetCommRealData(QString, int)", sCode, self.realType.REALTYPE[sRealType]['저가']) # 출력 : +(-)2530
+```
+
+#### DisconnectRealData(QString)
+스크린 번호 끊기
+
+#### SetRealRemove(QString, QString)
+특정 스크린 번호 안에 있는 종목 하나 취소
+    * screen_num : 스크린 번호
+    * code : 종목코드
 
