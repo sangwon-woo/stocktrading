@@ -1,22 +1,39 @@
-Kiwoom OpenAPI Method
+# Surfing : Automated Stock Trading System
+<h2> # Algorithm Trading & System Trading </h2>
 
-self.kiwoom = QAxWidget("KHOPENAPI.KHOpenAPICtrl.1")
+키움증권 API를 사용하여 코스피, 코스닥에서 거래되는 종목을 특정 거래 조건에 맞춰 매매하는 시스템
 
-# QAxBase 클래스의 dynamicCall Method를 사용하는 함수
-## CommConnect()
+## # Base Class Architecture
+![BaseClassArchitecture](BaseClassArchitecture.png)
+- QApplication : 프로그램을 앱처럼 실행하거나 홈페이지처럼 실행할 수 있도록 그래픽적인 요소를 제어할 수 있는 기능을 포함
+- QAxContainer : 마이크로소프트사에서 제공하는 프로세스를 가지고 화면을 구성하는 데 필요한 기능들이 담겨있음
+- QAxWidget : 디자인 구성을 컨트롤하고 재사용하는 기능들을 포함
+- QAxBase.setControl() : 설치된 API 모듈을 파이썬에서 쓸 수 있도록 함. 즉, .ocx 확장자도 파이썬에서 사용할 수 있게 함
+- QAxBase.dynamicCall()
+- OCX : OLE Custom eXtension의 약자. 마이크로소프트 윈도우 운영체제에서 실행할 수 있도록 만들어진 특수한 목적의 프로그램이며 확장자명이 ocx임.
+
+
+## # Kiwoom OpenAPI Method
+### 1. 키움 API를 파이썬에서 사용(키움 API 레지스트리 제어 함수)
+self.kiwoom = QAxWidget("KHOPENAPI.KHOpenAPICtrl.1")  
+또는   
+kiwoom = self.setControl("KHOPENAPI.KHOpenAPICtrl.1")
+
+### 2. QAxBase 클래스의 dynamicCall Method를 사용하는 함수
+#### CommConnect()
 "로그인 윈도우 실행"
 self.kiwoom.dynamicCall("CommConnect()")
 
-## GetConnectState()
+#### GetConnectState()
 "현재 접속상태 반환"
 self.kiwoom.dynamicCall("GetConnectState()")
 
-## SetInputValue()
+#### SetInputValue()
 "Transaction 입력 값을 서버통신 전에 입력"
 self.kiwoom.dynamicCall("SetInputValue(QString, QString)", "종목코드", '039490')
 
 
-## CommRqData()
+#### CommRqData()
 "TR을 서버로 전송"
 self.kiwoom.dynamicCall("CommRqData(QString, QString, int, QString)", "opt10001_req", "opt10001", 0, "0101")
 
