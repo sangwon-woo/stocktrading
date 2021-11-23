@@ -14,6 +14,9 @@
 
 
 ## # Kiwoom OpenAPI Method
+- 시그널(Signal) : 키움 서버에 요청하는 신호
+- 슬롯(Slot) : 요청한 데이터의 결과값을 받을 공간
+- 이벤트(Event) : 시그널이 발생하면 결과값을 어느 슬롯에서 받을 것인지 연결해주는 다리
 ### 1. 키움 API를 파이썬에서 사용(키움 API 레지스트리 제어 함수)
 self.kiwoom = QAxWidget("KHOPENAPI.KHOpenAPICtrl.1")  
 또는   
@@ -45,7 +48,7 @@ self.kiwoom.dynamicCall("CommRqData(QString, QString, int, QString)", "opt10001_
     2. OpenAPI 조회 함수를 호출해서 전문을 서버로 전송
         CommRqData("RQName", "opt10001", "0", "화면번호")
 
-## CommGetData(1, 2, 3, 4, 5)
+#### CommGetData(1, 2, 3, 4, 5)
 "TR 데이터, 실시간 데이터, 체결잔고 데이터를 반환"
 item_name = self.kiwoom.dynamicCall("CommGetData(QString, QString, QString, int, QString)", trcode, "", rqname, 0, "종목명")
 
@@ -54,7 +57,7 @@ item_name = self.kiwoom.dynamicCall("CommGetData(QString, QString, QString, int,
     실시간 Data : 1. Key Code,  2. Real Type,   3. Item Index,  4. 사용안함     5. 사용안함
     체결 Data   : 1. 체결구분,  2. "-1",        3. 사용안함,    4. Item Index,  5. 사용안함
 
-## GetLoginInfo()
+#### GetLoginInfo()
 "로그인한 사용자 정보를 반환"
 account_num = self.kiwoom.dynamicCall("GetLoginInfo(QString)", ["ACCNO"]).rstrip(';')
 
@@ -66,7 +69,7 @@ account_num = self.kiwoom.dynamicCall("GetLoginInfo(QString)", ["ACCNO"]).rstrip
     * "KEY_BSECGB" : 키보드보안 해지여부. 0: 정상, 1: 해지
     * "FIREW_SECGB" : 방화벽 설정 여부. 0: 미설정, 1: 설정, 2: 해지
 
-## GetCodeListByMarket
+#### GetCodeListByMarket
 "시장구분에 따른 종목코드를 반환"
 kospi_code_list = self.kiwoom.dynamicCall("GetCodeListByMarket(QString)", ["0"]).split(';')
 
@@ -81,20 +84,20 @@ kospi_code_list = self.kiwoom.dynamicCall("GetCodeListByMarket(QString)", ["0"])
     * "10" : KOSDAQ
     * "30" : 제3시장
 
-## GetMasterCodeName
+#### GetMasterCodeName
 "종목코드의 한글명을 반환"
 item_name = self.kiwoom.dynamicCall("GetMasterCodeName(QString)", ["005680"])
 
 
-# Event 처리 함수
-## OnEventConnect()
+### 3. Event 처리 함수
+#### OnEventConnect()
 "로그인 이벤트 처리"
 self.kiwoom.OnEventConnect.connect(self.event_connect)
 
 def event_connect(self, err_code):
     if err_code == 0: self.text_edit.append("로그인 성공")
 
-## OnReceiveTrData()
+#### OnReceiveTrData()
 "서버통신 후 데이터를 받은 시점을 알려줌"
 self.kiwoom.OnReceiveTrData.connect(self.receive_trdata)
 
