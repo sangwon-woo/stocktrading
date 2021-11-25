@@ -1,7 +1,9 @@
 
 from kiwoom_api import *
 
-set_slots()
-login()
-d = opt10001('007770')
-print(d)
+k = Kiwoom()
+
+k.comm_connect()
+k.get_login_info()
+k.request_opt10001('000020')
+print(k.transaction_data)
