@@ -11,9 +11,8 @@
 
 import pandas as pd
 from pykiwoom.kiwoom import *
-from setting import *
+from ..config.setting import *
 from update_daily_data import get_stock_trade_data_until_now
-import pprint
 
 
 def init_checklist(kiwoom):
@@ -154,23 +153,3 @@ def update_checklist(kiwoom):
 
     today_checklist.to_csv(CSV_TODAY_CHECKLIST, index=None, encoding='utf-8')
     print('update checklist 완료')
-
-
-
-
-
-
-
-if __name__ == '__main__':
-    kiwoom = Kiwoom()
-    kiwoom.CommConnect(block=True)
-
-    state = kiwoom.GetConnectState()
-    if state == 0:
-        print("미연결")
-    elif state == 1:
-        print("연결완료")
-
-    update_checklist(kiwoom)
-
-    

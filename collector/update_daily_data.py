@@ -9,14 +9,12 @@
 모든 종목에 대해 위의 과정을 반복한다.
 
 '''
-from os import rename
 import time
 import pandas as pd
 import numpy as np
 from pykiwoom.kiwoom import *
-from setting import *
+from ..config.setting import *
 from datetime import datetime
-import pprint
 import shutil
 
 def get_stock_trade_data_until_now(kiwoom, code, name, today, STOCK_ITEM_DTYPE, TRADEDATA_DTYPE, next=0):

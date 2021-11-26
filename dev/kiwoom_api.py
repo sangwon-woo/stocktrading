@@ -7,8 +7,6 @@ from PyQt5.QAxContainer import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 
-from update_checklist import iter_checklist
-
 if not QApplication.instance():
     app = QApplication(sys.argv)
     

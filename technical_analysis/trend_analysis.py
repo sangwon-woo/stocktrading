@@ -11,7 +11,7 @@
 '''
 import time
 import pandas as pd
-from setting import *
+from ..config.setting import *
 
 def get_trend_analysis(df, days):
     
