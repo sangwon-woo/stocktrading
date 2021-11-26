@@ -1,11 +1,10 @@
 import sys
 import time
-import pythoncom
-import datetime
 import pandas as pd
 from PyQt5.QAxContainer import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
+from config.setting import *
 
 if not QApplication.instance():
     app = QApplication(sys.argv)
@@ -29,7 +28,23 @@ class Kiwoom:
         self._set_event_loop()
         self._set_signal_slots()
 
+    def _set_signal_slots(self):
+        self.ocx.OnEventConnect.connect(self._on_event_connect)
+        self.ocx.OnReceiveTrData.connect(self._on_receive_tr_data)
+        self.ocx.OnReceiveRealData.connect(self._on_receive_real_data)
+        self.ocx.OnReceiveChejanData.connect(self._on_receive_chejan_data)
+        self.ocx.OnReceiveMsg.connect(self._on_receive_msg)
+        self.ocx.OnReceiveConditionVer.connect(self._on_receive_condition_ver)
+        self.ocx.OnReceiveTrCondition.connect(self._on_receive_tr_condition)
 
+    def _set_event_loop(self):
+        self.login_event_loop = QEventLoop()
+        self.transaction_event_loop = None
+        self.real_data_event_loop = QEventLoop()
+        self.chejan_event_loop = QEventLoop()
+        self.msg_event_loop = QEventLoop()
+        
+#########################################################슬롯함수#########################################################################################################################
     def _on_event_connect(self, err_code):
         print(f"_on_event_connect. error code : {err_code}")
         if err_code == 0:
@@ -37,17 +52,21 @@ class Kiwoom:
             self.login_event_loop.exit()
 
     def _on_receive_tr_data(self, screen_number, request_name, transaction_code, record_name, next, data_length, error_code, message, simple_message):
-        print(f"OnReceiveTrData\nscreen_number: {screen_number}\nrequest_name: {request_name}\ntransaction_code: {transaction_code}\nrecord_name: {record_name}\nnext: {next}")
+        print(f"OnReceiveTrData\스크린번호: {screen_number}\n리퀘스트명: {request_name}\n트랜잭션코드: {transaction_code}\n레코드명: {record_name}\n다음페이지여부: {next}")
         if request_name == '주식기본정보요청':
             self.transaction_data = self.get_opt10001(transaction_code, record_name)
-        elif request_name == '':
-            pass
-        
+
+        elif request_name == '예수금상세현황요청':
+            self.transaction_data = self.get_opw00001(transaction_code, request_name)
+
+        elif request_name == '계좌평가잔고내역요청':
+            self.transaction_data = self.get_opw00018(transaction_code, request_name)
+
     def _on_receive_real_data(self, stock_code, real_type, real_data):
         print(f"OnReceiveRealData\종목코드: {stock_code}\n실시간타입: {real_type}")
-        if real_type == '':
+        if real_type == '장시작시간':
             pass
-        elif real_type == '':
+        elif real_type == '주식체결':
             pass
 
     def _on_receive_chejan_data(self, gubun, item_cnt, fid_list):
@@ -65,45 +84,8 @@ class Kiwoom:
         codes = code_list.split(';')[:-1]
         self.tr_condition_data = codes
         self.tr_condition_loaded= True
-
-    def _set_signal_slots(self):
-        self.ocx.OnEventConnect.connect(self._on_event_connect)
-        self.ocx.OnReceiveTrData.connect(self._on_receive_tr_data)
-        self.ocx.OnReceiveRealData.connect(self._on_receive_real_data)
-        self.ocx.OnReceiveChejanData.connect(self._on_receive_chejan_data)
-        self.ocx.OnReceiveMsg.connect(self._on_receive_msg)
-        self.ocx.OnReceiveConditionVer.connect(self._on_receive_condition_ver)
-        self.ocx.OnReceiveTrCondition.connect(self._on_receive_tr_condition)
-
-    def _set_event_loop(self):
-        self.login_event_loop = QEventLoop()
-        self.transaction_event_loop = None
-        self.real_data_event_loop = QEventLoop()
-        self.chejan_event_loop = QEventLoop()
-        self.msg_event_loop = QEventLoop()
-
-    def comm_connect(self):
-        self.ocx.dynamicCall("CommConnect()")
-        self.login_event_loop.exec_()
-
-    def get_comm_data(self, transaction_code, record_name, index, item_name):
-        data = self.ocx.dynamicCall("GetCommData(QString, QString, int, QString)", transaction_code, record_name, index, item_name)
-
-        return data
-
-    def set_input_value(self, id, value):
-        self.ocx.dynamicCall("SetInputValue(QString, QString)", id, value)
-
-    def comm_rq_data(self, request_name, transaction_code, next, screen_number):
-        error_code = self.ocx.dynamicCall("CommRqData(QString, QString, int, QString)", request_name, transaction_code, next, screen_number)
-        self.transaction_event_loop = QEventLoop()
-        self.transaction_event_loop.exec_()
-
-        time.sleep(0.7)
-
-        if error_code == 0:
-            print('Request Success')
-
+#####################################################################################################################################################################################
+#####################################################################################################################################################################################
     def get_login_info(self):
         account_list = self.ocx.dynamicCall("GetLoginInfo(QString)", "ACCNO").rstrip(';')
         user_id = self.ocx.dynamicCall("GetLoginInfo(QString)", "USER_ID")
@@ -117,8 +99,49 @@ class Kiwoom:
 
         print(self.account_info)
 
+    def comm_connect(self):
+        self.ocx.dynamicCall("CommConnect()")
+        self.login_event_loop.exec_()
+
+    def disconnect_real_data(self, screen_num = None):
+        self.ocx.dynamicCall("DisconnectRealData(QString)", screen_num)
+
+    def get_code_list_by_market(self, market_code):
+        code_list = self.ocx.dynamicCall("GetCodeListByMarket(Qstring)", market_code)
+        code_list = code_list.split(';')[:-1]
+
+        return code_list
+#####################################################################################################################################################################################
+#####################################################################################################################################################################################
+    def set_input_value(self, id, value):
+        self.ocx.dynamicCall("SetInputValue(QString, QString)", id, value)
+
+    def comm_rq_data(self, request_name, transaction_code, next, screen_number):
+        error_code = self.ocx.dynamicCall("CommRqData(QString, QString, int, QString)", request_name, transaction_code, next, screen_number)
+        self.transaction_event_loop = QEventLoop()
+        self.transaction_event_loop.exec_()
+
+        time.sleep(0.7)
+
+        if error_code == 0:
+            print('Request Success')
+
+    def get_comm_data(self, transaction_code, record_name, index, item_name):
+        data = self.ocx.dynamicCall("GetCommData(QString, QString, int, QString)", transaction_code, record_name, index, item_name)
+
+        return data
+#####################################################################################################################################################################################
+#####################################################################################################################################################################################
+    def register_market_operation(self, screen_number, fid):
+        pass
+
+    def register_realtime_settlement(self, screen_number, stock_code, fid):
+        pass
+#####################################################################################################################################################################################
+#####################################################################################################################################################################################
     def request_opt10001(self, stock_code):
         self.set_input_value("종목코드", stock_code)
+
         self.comm_rq_data("주식기본정보요청", 'opt10001', 0, '0114')
 
     def get_opt10001(self, transaction_code, record_name):
@@ -208,3 +231,59 @@ class Kiwoom:
         self.transaction_event_loop.exit()
 
         return ret
+
+    def request_opw00001(self):
+        self.set_input_value('계좌번호', REAL_ACCOUNT)
+        self.set_input_value('비밀번호', PASSWORD)
+        self.set_input_value('비밀번호입력매체구분', '00')
+        self.set_input_value('조회구분', '1')
+
+        self.comm_rq_data('예수금상세현황요청', 'opw00001', 0, '2000')
+
+    def get_opw00001(self, transaction_code, request_name):
+        ret = {}
+
+        deposit = int(self.get_comm_data(transaction_code, request_name, 0, '예수금'))
+        withdrawable_deposit = int(self.get_comm_data(transaction_code, request_name, 0, '출금가능금액'))
+
+        ret['예수금'] = deposit
+        ret['출금가능금액'] = withdrawable_deposit
+
+        self.transaction_event_loop.exit()
+
+        return ret
+
+    def request_opw00018(self):
+        self.set_input_value('계좌번호', REAL_ACCOUNT)
+        self.set_input_value('비밀번호', PASSWORD)
+        self.set_input_value('비밀번호입력매체구분', '00')
+        self.set_input_value('조회구분', '1')
+
+        self.comm_rq_data('계좌평가잔고내역요청', 'opw00018', 0, '2000')
+
+    def get_opw00018(self, transaction_code, request_name):
+        ret = {}
+
+        total_buy_money = int(self.get_comm_data(transaction_code, request_name, 0, '총매입금액'))
+        total_profit_loss_money = int(self.get_comm_data(transaction_code, request_name, 0, '총평가손익금액'))
+        total_profit_loss_rate = int(self.get_comm_data(transaction_code, request_name, 0, '총수익률(%)'))
+
+        ret['총매입금액'] = total_buy_money
+        ret['총평가손익금액'] = total_profit_loss_money
+        ret['총수익률(%)'] = total_profit_loss_rate
+
+        self.transaction_event_loop.exit()
+
+        return ret
+
+
+
+
+
+
+
+
+
+
+#####################################################################################################################################################################################
+#####################################################################################################################################################################################
