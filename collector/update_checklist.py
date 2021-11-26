@@ -137,8 +137,8 @@ class CheckList:
 
 
     def update_checklist(self):
-        self.today_checklist = self.iter_checklist()
-
+        self.iter_checklist()
+        
         not_tracked_list = self.today_checklist[self.today_checklist['일봉관리여부'] == False]
 
         if not_tracked_list.shape[0]:
