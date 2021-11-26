@@ -1,5 +1,8 @@
 import argparse
 import os
+from collector.update_checklist import *
+from pykiwoom.kiwoom import Kiwoom
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--update-checklist', '-c', type=bool, default=False, help='run update_checklist.py')
@@ -12,8 +15,11 @@ update_checklist_flag = args.update_checklist
 update_daily_data_flag = args.update_daily_data
 trend_analysis_flag = args.trend_analysis
 
+kiwoom = Kiwoom()
+
 if update_checklist_flag:
-    os.system('C:\\Users\\pacific\\miniconda3\\envs\\py32bits\\python.exe collector\\update_checklist.py')
+    checklist = CheckList(kiwoom)
+    checklist.update_checklist()
 
 if update_daily_data_flag:
     os.system('C:\\Users\\pacific\\miniconda3\\envs\\py32bits\\python.exe collector\\update_daily_data.py')

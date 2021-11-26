@@ -25,6 +25,7 @@ def get_stock_trade_data_until_now(kiwoom, code, name, today, STOCK_ITEM_DTYPE, 
                                     수정주가구분=1, 
                                     output='주식일봉차트조회',
                                     next=next)
+                                    
     if recent_df.sum().sum() == code:
         return None
 

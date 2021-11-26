@@ -20,7 +20,7 @@ def get_today(today):
 
 
 PWD = os.getcwd()
-
+print(PWD)
 TODAY = get_today(datetime.today())
 
 
@@ -65,17 +65,6 @@ TRADEDATA_DTYPE = {
 STOCK_ITEM_DTYPE = {
     '현재가' : '종가',
     '일자' : '날짜'
-}
-
-TIMESPAN = {
-    '1개주' : 5,
-    '2개주' : 10,
-    '3개주' : 15,
-    '1개월' : 20,
-    '2개월' : 40,
-    '3개월' : 60,
-    '6개월' : 120,
-    '1개년' : 240
 }
 
 API_COUNT = 0
