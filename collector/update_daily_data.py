@@ -191,7 +191,7 @@ class CollectDailyData:
             
             print(f"기존 데이터는 {str(min_date)[:10]}부터 {str(max_date)[:10]}까지 존재", end=' ')
             
-            recent_df = get_stock_trade_data_until_now(kiwoom,
+            recent_df = get_stock_trade_data_until_now(self.kiwoom,
                                                         code, 
                                                         name, 
                                                         TODAY, 
@@ -271,7 +271,7 @@ class CollectDailyData:
             
             print(f"기존 데이터는 {str(min_date)[:10]}부터 {str(max_date)[:10]}까지 존재", end=' ')
             
-            recent_df = get_stock_trade_data_until_now(kiwoom,
+            recent_df = get_stock_trade_data_until_now(self.kiwoom,
                                                         code, 
                                                         name, 
                                                         TODAY, 
