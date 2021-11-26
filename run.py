@@ -13,10 +13,10 @@ update_daily_data_flag = args.update_daily_data
 trend_analysis_flag = args.trend_analysis
 
 if update_checklist_flag:
-    os.system('C:\\Users\\pacific\\miniconda3\\envs\\py32bits\\python.exe update_checklist.py')
+    os.system('C:\\Users\\pacific\\miniconda3\\envs\\py32bits\\python.exe collector\\update_checklist.py')
 
 if update_daily_data_flag:
-    os.system('C:\\Users\\pacific\\miniconda3\\envs\\py32bits\\python.exe update_daily_data.py')
+    os.system('C:\\Users\\pacific\\miniconda3\\envs\\py32bits\\python.exe collector\\update_daily_data.py')
 
 if trend_analysis_flag:
-    os.system('C:\\Users\\pacific\\miniconda3\\envs\\py39_64bits\\python.exe trend_analysis.py')
+    os.system('C:\\Users\\pacific\\miniconda3\\envs\\py39_64bits\\python.exe collector\\trend_analysis.py')
