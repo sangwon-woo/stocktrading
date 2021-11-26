@@ -11,11 +11,12 @@
 
 import pandas as pd
 from pykiwoom.kiwoom import *
-from ..config.setting import *
-from update_daily_data import get_stock_trade_data_until_now
+from config.setting import *
+from collector.update_daily_data import get_stock_trade_data_until_now
 
 class CheckList:
     def __init__(self, kiwoom):
+
         self.kiwoom = kiwoom
         self.today_checklist = {
             '시장명':[], 

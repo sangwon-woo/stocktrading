@@ -2,7 +2,7 @@ import time
 import pandas as pd
 import numpy as np
 from pykiwoom.kiwoom import *
-from ..config.setting import *
+from config.setting import *
 from datetime import datetime
 import shutil
 

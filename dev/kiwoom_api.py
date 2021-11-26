@@ -40,11 +40,15 @@ class Kiwoom:
         print(f"OnReceiveTrData\nscreen_number: {screen_number}\nrequest_name: {request_name}\ntransaction_code: {transaction_code}\nrecord_name: {record_name}\nnext: {next}")
         if request_name == '주식기본정보요청':
             self.transaction_data = self.get_opt10001(transaction_code, record_name)
-            
+        elif request_name == '':
+            pass
         
-    
-    def _on_receive_real_data(self, code, real_type, real_data):
-        pass
+    def _on_receive_real_data(self, stock_code, real_type, real_data):
+        print(f"OnReceiveRealData\종목코드: {stock_code}\n실시간타입: {real_type}")
+        if real_type == '':
+            pass
+        elif real_type == '':
+            pass
 
     def _on_receive_chejan_data(self, gubun, item_cnt, fid_list):
         print(f"OnReceiveChejanData {gubun} {item_cnt} {fid_list}")
