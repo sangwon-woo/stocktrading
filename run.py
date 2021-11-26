@@ -37,5 +37,6 @@ if update_checklist_flag:
 if update_daily_data_flag:
     collect_daily_data = CollectDailyData(kiwoom)
     collect_daily_data.iter_daily_data()
+    
 if trend_analysis_flag:
     os.system('C:\\Users\\pacific\\miniconda3\\envs\\py39_64bits\\python.exe collector\\trend_analysis.py')
