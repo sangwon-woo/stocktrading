@@ -131,7 +131,7 @@ dmypy.json
 
 .vscode
 log.txt
-*.ipynb
+jupyter/
 *.mwb
 DBconfig.py
 stock_data_*/*
