@@ -291,7 +291,7 @@ class CollectDailyData:
                     continue
             
             if self.check_df(pre_df, recent_df):
-                self.get_total_trade_data_kosdaq(kiwoom, code, recent_df, today_checklist, i)
+                self.get_total_trade_data_kosdaq(code, recent_df, today_checklist, i)
                 continue
 
             lastest_df = recent_df[recent_df['날짜'] >= max_date]
