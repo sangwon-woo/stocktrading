@@ -1,9 +1,9 @@
 import argparse
 import os
 from collector.update_checklist import *
+from collector.update_daily_data import CollectDailyData
 from pykiwoom.kiwoom import Kiwoom
 
-from collector.update_daily_data import CollectDailyData
 
 
 def login_success(kiwoom):
