@@ -26,17 +26,21 @@ update_checklist_flag = args.update_checklist
 update_daily_data_flag = args.update_daily_data
 trend_analysis_flag = args.trend_analysis
 
-kiwoom = Kiwoom()
-kiwoom.CommConnect(block=True)
-login_success(kiwoom)
+if trend_analysis_flag:
+    os.system('C:\\Users\\pacific\\miniconda3\\envs\\py39_64bits\\python.exe technical_analysis\\trend_analysis.py')
+
+def init_kiwoom():
+    kiwoom = Kiwoom()
+    kiwoom.CommConnect(block=True)
+    login_success(kiwoom)
 
 if update_checklist_flag:
+    init_kiwoom()
     checklist = CheckList(kiwoom)
     checklist.update_checklist()
 
 if update_daily_data_flag:
+    init_kiwoom()
     collect_daily_data = CollectDailyData(kiwoom)
     collect_daily_data.iter_daily_data()
     
-if trend_analysis_flag:
-    os.system('C:\\Users\\pacific\\miniconda3\\envs\\py39_64bits\\python.exe collector\\trend_analysis.py')
