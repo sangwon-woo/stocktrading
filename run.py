@@ -1,5 +1,6 @@
 import argparse
 import os
+import time
 from collector.update_checklist import *
 from collector.update_daily_data import CollectDailyData
 from pykiwoom.kiwoom import Kiwoom
@@ -27,7 +28,10 @@ update_daily_data_flag = args.update_daily_data
 trend_analysis_flag = args.trend_analysis
 
 if trend_analysis_flag:
-    os.system('C:\\Users\\pacific\\miniconda3\\envs\\py39_64bits\\python.exe technical_analysis\\trend_analysis.py')
+    start = time.time()
+    os.system('C:\\Users\\pacific\\miniconda3\\envs\\py39_64bits\\python.exe -c "import technical_analysis.trend_analysis as t; t.run_trend_analysis()"')
+    end = time.time()
+    print(f'총 걸린 시간 : {(end-start) / 60:.2f}분')
 
 def init_kiwoom():
     kiwoom = Kiwoom()
