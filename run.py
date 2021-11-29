@@ -27,24 +27,28 @@ update_checklist_flag = args.update_checklist
 update_daily_data_flag = args.update_daily_data
 trend_analysis_flag = args.trend_analysis
 
-if trend_analysis_flag:
-    start = time.time()
-    os.system('C:\\Users\\pacific\\miniconda3\\envs\\py39_64bits\\python.exe -c "import technical_analysis.trend_analysis as t; t.run_trend_analysis()"')
-    end = time.time()
-    print(f'총 걸린 시간 : {(end-start) / 60:.2f}분')
 
 def init_kiwoom():
     kiwoom = Kiwoom()
     kiwoom.CommConnect(block=True)
     login_success(kiwoom)
 
+    return kiwoom
+
 if update_checklist_flag:
-    init_kiwoom()
+    kiwoom = init_kiwoom()
     checklist = CheckList(kiwoom)
     checklist.update_checklist()
+    del kiwoom
 
 if update_daily_data_flag:
-    init_kiwoom()
+    kiwoom = init_kiwoom()
     collect_daily_data = CollectDailyData(kiwoom)
     collect_daily_data.iter_daily_data()
+    del kiwoom
     
+if trend_analysis_flag:
+    start = time.time()
+    os.system('C:\\Users\\pacific\\miniconda3\\envs\\py39_64bits\\python.exe -c "import technical_analysis.trend_analysis as t; t.run_trend_analysis()"')
+    end = time.time()
+    print(f'총 걸린 시간 : {(end-start) / 60:.2f}분')
