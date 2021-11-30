@@ -1,9 +1,12 @@
 import argparse
 import os
 import time
+
+from pandas.io import api
 from collector.update_checklist import *
 from collector.update_daily_data import CollectDailyData
 from pykiwoom.kiwoom import Kiwoom
+from config.setting import *
 
 
 
@@ -14,6 +17,12 @@ def login_success(kiwoom):
     elif state == 1:
         print("연결완료")
 
+def init_kiwoom():
+    kiwoom = Kiwoom()
+    kiwoom.CommConnect(block=True)
+    login_success(kiwoom)
+
+    return kiwoom
 
 
 parser = argparse.ArgumentParser()
@@ -28,20 +37,17 @@ update_daily_data_flag = args.update_daily_data
 trend_analysis_flag = args.trend_analysis
 
 
-def init_kiwoom():
-    kiwoom = Kiwoom()
-    kiwoom.CommConnect(block=True)
-    login_success(kiwoom)
-
-    return kiwoom
 
 if update_checklist_flag:
+
     kiwoom = init_kiwoom()
     checklist = CheckList(kiwoom)
     checklist.update_checklist()
     del kiwoom
+    
 
 if update_daily_data_flag:
+
     kiwoom = init_kiwoom()
     collect_daily_data = CollectDailyData(kiwoom)
     collect_daily_data.iter_daily_data()
