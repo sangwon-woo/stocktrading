@@ -62,7 +62,10 @@ if update_daily_data_flag:
 
             today_checklist = pd.read_csv(CSV_TODAY_CHECKLIST, encoding='utf-8', dtype=CHECKLIST_DTYPE)
             today_checklist['일봉최근날짜'] = today_checklist['일봉최근날짜'].astype('object')
-            
+
+            print(f'남은 코스피 종목 갯수: {kospi_cnt_not_yet}')
+            print(f'남은 코스닥 종목 갯수: {kosdaq_cnt_not_yet}')
+
             kiwoom = init_kiwoom()
 
             kospi_code_list_until_now = kiwoom.GetCodeListByMarket('0')
@@ -83,6 +86,7 @@ if update_daily_data_flag:
                 print('API LIMIT!')
                 API_COUNT = 0
                 del kiwoom
+                del collect_daily_data
                 break
             elif ret == 'kospi_complete':
                 print('코스피 목록 완료')
@@ -96,6 +100,7 @@ if update_daily_data_flag:
                 print('API LIMIT!')
                 API_COUNT = 0
                 del kiwoom
+                del collect_daily_data
                 break
             elif ret == 'kosdaq_complete':
                 print('코스닥 목록 완료')   
