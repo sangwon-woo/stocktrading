@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from pykiwoom.kiwoom import *
 from config.setting import *
-from config.setting import API_COUNT
+from config.api_count import API_COUNT as api
 from datetime import datetime
 import shutil
 
@@ -119,7 +119,7 @@ class CollectDailyData:
         today_checklist.loc[today_checklist['종목코드'] == code, '일봉최종수정일'] = TODAY
         today_checklist.loc[today_checklist['종목코드'] == code, '일봉최근날짜'] = max_date.strftime("%Y%m%d")
 
-        print(f'today_checklist에 업데이트 완료 {i+1}/{kospi_cnt_not_yet} ({API_COUNT})')
+        print(f'today_checklist에 업데이트 완료 {i+1}/{self.kospi_cnt_not_yet} ({API_COUNT})')
 
     def get_total_trade_data_kosdaq(self, code, recent_df, today_checklist, i):
         global API_COUNT
