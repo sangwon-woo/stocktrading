@@ -28,7 +28,8 @@ def get_stock_trade_data_until_now(kiwoom, code, name, today, STOCK_ITEM_DTYPE, 
     
     return recent_df
 class CollectDailyData:
-    def __init__(self, 
+    def __init__(self,
+                API_COUNT,
                 kiwoom,
                 kospi_not_yet,
                 kosdaq_not_yet,
@@ -36,6 +37,7 @@ class CollectDailyData:
                 kosdaq_cnt_not_yet):
 
         self.kiwoom = kiwoom
+        self.api_count = API_COUNT
         self.kospi_not_yet = kospi_not_yet
         self.kosdaq_not_yet = kosdaq_not_yet
         self.kospi_cnt_not_yet = kospi_cnt_not_yet
@@ -88,12 +90,8 @@ class CollectDailyData:
             print(f'{code} 제거 완료')
 
     def get_total_trade_data_kospi(self, code, recent_df, today_checklist, i):
-        global api
-
         print('기존 데이터와 신규 데이터가 달라서 다시 다운받기 시작')
         while self.kiwoom.tr_remained:
-            if api >= 999:
-                raise Exception("API Limit Exceed!")
 
             temp_df = get_stock_trade_data_until_now(self.kiwoom, 
                                                     code,
@@ -103,7 +101,7 @@ class CollectDailyData:
                                                     TRADEDATA_DTYPE, 
                                                     next=2)
             time.sleep(1)
-            api += 1
+            self.api_count += 1
 
             if temp_df['날짜'].min() < pd.Timestamp('20100101'):
                 temp_df = temp_df[temp_df['날짜'] > pd.Timestamp('20100101')]
@@ -112,7 +110,10 @@ class CollectDailyData:
 
             recent_df = recent_df.append(temp_df, ignore_index=True)
 
-            print("API_COUNT :", api)
+            print("API_COUNT :", self.api_count)
+
+            if self.api_count >= 999:
+                return 'api_limit', today_checklist
 
         recent_df.to_csv(DIR_KOSPI_DAILY + f'\\{code}.csv', encoding='utf-8', index=None)
         print('업데이트 및 저장 완료', end=' ')
@@ -125,13 +126,11 @@ class CollectDailyData:
 
         print(f'today_checklist에 업데이트 완료 {i+1}/{self.kospi_cnt_not_yet} ({api})')
 
-    def get_total_trade_data_kosdaq(self, code, recent_df, today_checklist, i):
-        global api
+        return 'complete', today_checklist
 
+    def get_total_trade_data_kosdaq(self, code, recent_df, today_checklist, i):
         print('기존 데이터와 신규 데이터가 달라서 다시 다운받기 시작')
         while self.kiwoom.tr_remained:
-            if api >= 999:
-                raise Exception("API Limit Exceed!")
 
             temp_df = get_stock_trade_data_until_now(self.kiwoom, 
                                                     code,
@@ -141,7 +140,7 @@ class CollectDailyData:
                                                     TRADEDATA_DTYPE, 
                                                     next=2)
             time.sleep(1)
-            api += 1
+            self.api_count += 1
 
             if temp_df['날짜'].min() < pd.Timestamp('20100101'):
                 temp_df = temp_df[temp_df['날짜'] > pd.Timestamp('20100101')]
@@ -150,7 +149,10 @@ class CollectDailyData:
 
             recent_df = recent_df.append(temp_df, ignore_index=True)
 
-            print("API_COUNT :", api)
+            print("API_COUNT :", self.api_count)
+
+            if self.api_count == 999:
+                return 'api_limit', today_checklist
 
         recent_df.to_csv(DIR_KOSDAQ_DAILY + f'\\{code}.csv', encoding='utf-8', index=None)
         print('업데이트 및 저장 완료', end=' ')
@@ -161,14 +163,14 @@ class CollectDailyData:
         today_checklist.loc[today_checklist['종목코드'] == code, '일봉최종수정일'] = TODAY
         today_checklist.loc[today_checklist['종목코드'] == code, '일봉최근날짜'] = max_date.strftime("%Y%m%d")
 
-        print(f'today_checklist에 업데이트 완료 {i+1}/{self.kosdaq_cnt_not_yet} ({api})')
+        print(f'today_checklist에 업데이트 완료 {i+1}/{self.kosdaq_cnt_not_yet} ({self.api_count})')
+
+        return 'complete', today_checklist
+
+            
         
     def iter_kospi(self, today_checklist, kospi_code_list_until_now):
-        global api
-
         for i, kcwh in enumerate(self.kospi_not_yet):
-            if api >= 999:
-                raise Exception("API Limit Exceed!")
 
             code = kcwh
             name = self.kiwoom.GetMasterCodeName(code)
@@ -191,7 +193,7 @@ class CollectDailyData:
                 today_checklist.loc[today_checklist['종목코드'] == code, '일봉최종수정일'] = TODAY
                 today_checklist.loc[today_checklist['종목코드'] == code, '일봉최근날짜'] = max_date.strftime("%Y%m%d")
 
-                print(f'today_checklist에 업데이트 완료 {i+1}/{self.kospi_cnt_not_yet} ({api})')
+                print(f'today_checklist에 업데이트 완료 {i+1}/{self.kospi_cnt_not_yet} ({self.api_count})')
                 continue
             
             if min_date < datetime(2010, 1, 1):
@@ -207,7 +209,7 @@ class CollectDailyData:
                                                         STOCK_ITEM_DTYPE, 
                                                         TRADEDATA_DTYPE)
             time.sleep(0.7)
-            api += 1
+            self.api_count += 1
 
             if type(recent_df) == type(None):
                 if code in kospi_code_list_until_now:
@@ -220,8 +222,11 @@ class CollectDailyData:
                     continue
 
             if self.check_df(pre_df, recent_df):
-                self.get_total_trade_data_kospi(code, recent_df, today_checklist, i)
-                continue
+                ret, today_checklist = self.get_total_trade_data_kospi(code, recent_df, today_checklist, i)
+                if ret == 'api_limit':
+                    return 'api_limit', today_checklist
+                elif ret == 'complete':
+                    continue
 
             lastest_df = recent_df[recent_df['날짜'] >= max_date]
 
@@ -239,15 +244,15 @@ class CollectDailyData:
                 today_checklist.loc[today_checklist['종목코드'] == code, '일봉최종수정일'] = TODAY
                 today_checklist.loc[today_checklist['종목코드'] == code, '일봉최근날짜'] = pre_df['날짜'].max().strftime("%Y%m%d")
 
-                print(f'today_checklist에 업데이트 완료 {i+1}/{self.kospi_cnt_not_yet} ({api})')
+                print(f'today_checklist에 업데이트 완료 {i+1}/{self.kospi_cnt_not_yet} ({self.api_count})')
+
+            if self.api_count == 999:
+                return 'api_limit', today_checklist
+        
+        return 'kospi_complete', today_checklist
 
     def iter_kosdaq(self, today_checklist, kosdaq_code_list_until_now):
-        global api
-
         for i, kcwh in enumerate(self.kosdaq_not_yet):
-            if api >= 999:
-                raise Exception('API Limit Exceed!')
-
             code = kcwh
             name = self.kiwoom.GetMasterCodeName(code)
             print(f'{name}({code}) => 처리시작', end=' ')
@@ -269,7 +274,7 @@ class CollectDailyData:
                 today_checklist.loc[today_checklist['종목코드'] == code, '일봉최종수정일'] = TODAY
                 today_checklist.loc[today_checklist['종목코드'] == code, '일봉최근날짜'] = max_date.strftime("%Y%m%d")
 
-                print(f'today_checklist에 업데이트 완료 {i+1}/{self.kosdaq_cnt_not_yet} ({api})')
+                print(f'today_checklist에 업데이트 완료 {i+1}/{self.kosdaq_cnt_not_yet} ({self.api_count})')
                 continue
             
             if min_date < datetime(2010, 1, 1):
@@ -286,7 +291,7 @@ class CollectDailyData:
                                                         STOCK_ITEM_DTYPE, 
                                                         TRADEDATA_DTYPE)
             time.sleep(0.7)
-            api += 1
+            self.api_count += 1
 
             if type(recent_df) == type(None):
                 if code in kosdaq_code_list_until_now:
@@ -299,8 +304,11 @@ class CollectDailyData:
                     continue
             
             if self.check_df(pre_df, recent_df):
-                self.get_total_trade_data_kosdaq(code, recent_df, today_checklist, i)
-                continue
+                ret, today_checklist = self.get_total_trade_data_kosdaq(code, recent_df, today_checklist, i)
+                if ret == 'api_limit':
+                    return 'api_limit', today_checklist
+                elif ret == 'complete':
+                    continue
 
             lastest_df = recent_df[recent_df['날짜'] >= max_date]
 
@@ -317,5 +325,9 @@ class CollectDailyData:
                 today_checklist.loc[today_checklist['종목코드'] == code, '일봉최종수정일'] = TODAY
                 today_checklist.loc[today_checklist['종목코드'] == code, '일봉최근날짜'] = pre_df['날짜'].max().strftime("%Y%m%d")
 
-                print(f'today_checklist에 업데이트 완료 {i+1}/{self.kosdaq_cnt_not_yet} ({api})')
+                print(f'today_checklist에 업데이트 완료 {i+1}/{self.kosdaq_cnt_not_yet} ({self.api_count})')
                 
+            if self.api_count == 999:
+                return 'api_limit', today_checklist
+        
+        return 'kosdaq_complete', today_checklist

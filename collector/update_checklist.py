@@ -1,12 +1,11 @@
 import pandas as pd
 from pykiwoom.kiwoom import *
 from config.setting import *
-from config.api_count import API_COUNT as api
 from collector.update_daily_data import get_stock_trade_data_until_now
 
 class CheckList:
-    def __init__(self, kiwoom):
-
+    def __init__(self, kiwoom, API_COUNT):
+        self.api_count = API_COUNT
         self.kiwoom = kiwoom
         self.today_checklist = {
             '시장명':[], 
@@ -79,8 +78,7 @@ class CheckList:
 
 
     def save_new_stock_data(self, not_tracked_list):
-        global api
-
+        
         for code in not_tracked_list['종목코드'].values:
             print(f'신규 종목코드 : {code} 데이터 다운로드 시작', end=' ')
             first_df = get_stock_trade_data_until_now(self.kiwoom,
@@ -89,7 +87,7 @@ class CheckList:
                                                         TODAY, STOCK_ITEM_DTYPE, 
                                                         TRADEDATA_DTYPE)
             time.sleep(0.7)
-            api += 1
+            self.api_count += 1
             market = not_tracked_list[not_tracked_list['종목코드'] == code].values[0][0]
 
             if type(first_df) == type(None):
@@ -105,7 +103,7 @@ class CheckList:
                                                         TRADEDATA_DTYPE, 
                                                         next=2)
                 time.sleep(2)
-                api += 1
+                self.api_count += 1
 
                 if temp_df['날짜'].min() < pd.Timestamp('20100101'):
                     temp_df = temp_df[temp_df['날짜'] > pd.Timestamp('20100101')]
@@ -114,9 +112,9 @@ class CheckList:
 
                 first_df = first_df.append(temp_df, ignore_index=True)
 
-                print("API_COUNT :", api)
+                print("API_COUNT :", self.api_count)
             else:
-                print("API_COUNT :", api)
+                print("API_COUNT :", self.api_count)
 
             if market == 'kospi':
                 first_df.to_csv(DIR_KOSPI_DAILY + f'\\{code}.csv', encoding='utf-8', index=None)
@@ -138,3 +136,5 @@ class CheckList:
 
         self.today_checklist.to_csv(CSV_TODAY_CHECKLIST, index=None, encoding='utf-8')
         print('update checklist 완료')
+
+        return self.api_count
