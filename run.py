@@ -52,7 +52,11 @@ if update_daily_data_flag:
     kosdaq_cnt_not_yet = len(kosdaq_not_yet)
 
     kiwoom = init_kiwoom()
-    collect_daily_data = CollectDailyData(kiwoom)
+    collect_daily_data = CollectDailyData(kiwoom,
+                                          kospi_not_yet,
+                                          kosdaq_not_yet,
+                                          kospi_cnt_not_yet,
+                                          kosdaq_cnt_not_yet)
     collect_daily_data.iter_daily_data()
     del kiwoom
     
