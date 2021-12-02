@@ -29,8 +29,8 @@ def get_stock_trade_data_until_now(kiwoom, code, name, today, STOCK_ITEM_DTYPE, 
     return recent_df
 class CollectDailyData:
     def __init__(self,
-                API_COUNT,
                 kiwoom,
+                API_COUNT,
                 kospi_not_yet,
                 kosdaq_not_yet,
                 kospi_cnt_not_yet,

@@ -62,11 +62,12 @@ if update_daily_data_flag:
 
             today_checklist = pd.read_csv(CSV_TODAY_CHECKLIST, encoding='utf-8', dtype=CHECKLIST_DTYPE)
             today_checklist['일봉최근날짜'] = today_checklist['일봉최근날짜'].astype('object')
+            
+            kiwoom = init_kiwoom()
 
             kospi_code_list_until_now = kiwoom.GetCodeListByMarket('0')
             kosdaq_code_list_until_now = kiwoom.GetCodeListByMarket('10')
 
-            kiwoom = init_kiwoom()
             collect_daily_data = CollectDailyData(kiwoom,
                                                 API_COUNT,
                                                 kospi_not_yet,
