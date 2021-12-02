@@ -1,6 +1,5 @@
 import time
 import pandas as pd
-import numpy as np
 from pykiwoom.kiwoom import *
 from config.setting import *
 from config.api_count import API_COUNT as api
@@ -164,11 +163,10 @@ class CollectDailyData:
 
         print(f'today_checklist에 업데이트 완료 {i+1}/{self.kosdaq_cnt_not_yet} ({api})')
         
-
-    def iter_kospi(self, today_checklist, kospi_code_list_until_now, kospi_not_yet):
+    def iter_kospi(self, today_checklist, kospi_code_list_until_now):
         global api
 
-        for i, kcwh in enumerate(kospi_not_yet):
+        for i, kcwh in enumerate(self.kospi_not_yet):
             if api >= 999:
                 raise Exception("API Limit Exceed!")
 
@@ -243,11 +241,10 @@ class CollectDailyData:
 
                 print(f'today_checklist에 업데이트 완료 {i+1}/{self.kospi_cnt_not_yet} ({api})')
 
-
-    def iter_kosdaq(self, today_checklist, kosdaq_code_list_until_now, kosdaq_not_yet):
+    def iter_kosdaq(self, today_checklist, kosdaq_code_list_until_now):
         global api
 
-        for i, kcwh in enumerate(kosdaq_not_yet):
+        for i, kcwh in enumerate(self.kosdaq_not_yet):
             if api >= 999:
                 raise Exception('API Limit Exceed!')
 
@@ -322,34 +319,3 @@ class CollectDailyData:
 
                 print(f'today_checklist에 업데이트 완료 {i+1}/{self.kosdaq_cnt_not_yet} ({api})')
                 
-
-    def iter_daily_data(self):
-
-        today_checklist = pd.read_csv(CSV_TODAY_CHECKLIST, encoding='utf-8', dtype=CHECKLIST_DTYPE)
-        today_checklist['일봉최근날짜'] = today_checklist['일봉최근날짜'].astype('object')
-
-        kospi_code_list_until_now = self.kiwoom.GetCodeListByMarket('0')
-        kosdaq_code_list_until_now = self.kiwoom.GetCodeListByMarket('10')
-
-        try:
-            self.iter_kospi(today_checklist, kospi_code_list_until_now, self.kospi_not_yet)
-        except Exception as m:
-            print(m)
-        else:    
-            print('코스피 목록 완료')
-        finally:
-            today_checklist.to_csv(CSV_TODAY_CHECKLIST, encoding='utf-8', index=None)
-
-        today_checklist = pd.read_csv(CSV_TODAY_CHECKLIST, encoding='utf-8', dtype=CHECKLIST_DTYPE)
-        today_checklist['일봉최근날짜'] = today_checklist['일봉최근날짜'].astype('object')
-
-        try:
-            self.iter_kosdaq(today_checklist, kosdaq_code_list_until_now, self.kosdaq_not_yet)
-        except Exception as m:
-            print(m)
-        else:
-            print('코스닥 목록 완료')
-        finally:
-            today_checklist.to_csv(CSV_TODAY_CHECKLIST, encoding='utf-8', index=None)
-
-        print('today_checklist 업데이트 완료')

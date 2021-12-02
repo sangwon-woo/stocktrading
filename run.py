@@ -6,6 +6,7 @@ from collector.update_checklist import *
 from collector.update_daily_data import CollectDailyData
 from pykiwoom.kiwoom import Kiwoom
 from config.api_count import API_COUNT as api
+from config.setting import *
 
 
 def login_success(kiwoom):
@@ -43,6 +44,7 @@ if update_checklist_flag:
     
 
 if update_daily_data_flag:
+
     lastest_checklist = pd.read_csv(CSV_LASTEST_CHECKLIST, encoding='utf-8', dtype=CHECKLIST_DTYPE)
     today_candidates = lastest_checklist[lastest_checklist['일봉최종수정일'] != int(TODAY)]
     today_candidates = today_candidates[['시장명', '종목명', '종목코드']]
@@ -57,7 +59,35 @@ if update_daily_data_flag:
                                           kosdaq_not_yet,
                                           kospi_cnt_not_yet,
                                           kosdaq_cnt_not_yet)
-    collect_daily_data.iter_daily_data()
+
+    today_checklist = pd.read_csv(CSV_TODAY_CHECKLIST, encoding='utf-8', dtype=CHECKLIST_DTYPE)
+    today_checklist['일봉최근날짜'] = today_checklist['일봉최근날짜'].astype('object')
+
+    kospi_code_list_until_now = collect_daily_data.kiwoom.GetCodeListByMarket('0')
+    kosdaq_code_list_until_now = collect_daily_data.kiwoom.GetCodeListByMarket('10')
+
+    try:
+        collect_daily_data.iter_kospi(today_checklist, kospi_code_list_until_now)
+    except Exception as m:
+        print(m)
+    else:
+        print('코스피 목록 완료')
+    finally:
+        today_checklist.to_csv(CSV_TODAY_CHECKLIST, encoding='utf-8', index=None)
+
+    today_checklist = pd.read_csv(CSV_TODAY_CHECKLIST, encoding='utf-8', dtype=CHECKLIST_DTYPE)
+    today_checklist['일봉최근날짜'] = today_checklist['일봉최근날짜'].astype('object')
+
+    try:
+        collect_daily_data.iter_kosdaq(today_checklist, kosdaq_code_list_until_now)
+    except Exception as m:
+        print(m)
+    else:
+        print('코스닥 목록 완료')
+    finally:
+        today_checklist.to_csv(CSV_TODAY_CHECKLIST, encoding='utf-8', index=None)
+
+    print('today_checklist 업데이트 완료')
     del kiwoom
     
 if trend_analysis_flag:
