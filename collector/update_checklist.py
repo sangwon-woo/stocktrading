@@ -134,9 +134,6 @@ class CheckList:
             print(not_tracked_list)
 
             self.save_new_stock_data(not_tracked_list)
-        else:
-            if lastest_checklist.equals(self.today_checklist):
-                print('어제와 오늘의 today_checklist가 같음.')
 
         self.today_checklist.to_csv(CSV_TODAY_CHECKLIST, index=None, encoding='utf-8')
         print('update checklist 완료')

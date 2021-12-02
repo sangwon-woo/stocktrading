@@ -28,7 +28,6 @@ def get_today(today):
 
 
 PWD = os.getcwd()
-print(PWD)
 TODAY = get_today(datetime.today())
 
 
@@ -83,11 +82,3 @@ total_code_list_we_have = kospi_code_list_we_have + kosdaq_code_list_we_have
 kospi_cnt_we_have = len(kospi_code_list_we_have)
 kosdaq_cnt_we_have = len(kosdaq_code_list_we_have)
 
-lastest_checklist = pd.read_csv(CSV_LASTEST_CHECKLIST, encoding='utf-8', dtype=CHECKLIST_DTYPE)
-
-today_candidates = lastest_checklist[lastest_checklist['일봉최종수정일'] != int(TODAY)]
-today_candidates = today_candidates[['시장명', '종목명', '종목코드']]
-kospi_not_yet = list(today_candidates[today_candidates['시장명'] == 'kospi']['종목코드'].values)
-kosdaq_not_yet = list(today_candidates[today_candidates['시장명'] == 'kosdaq']['종목코드'].values)
-kospi_cnt_not_yet = len(kospi_not_yet)
-kosdaq_cnt_not_yet = len(kosdaq_not_yet)

@@ -2,12 +2,10 @@ import argparse
 import os
 import time
 
-from pandas.io import api
 from collector.update_checklist import *
 from collector.update_daily_data import CollectDailyData
 from pykiwoom.kiwoom import Kiwoom
-from config.setting import *
-
+from config.setting import API_COUNT
 
 
 def login_success(kiwoom):
@@ -36,8 +34,6 @@ update_checklist_flag = args.update_checklist
 update_daily_data_flag = args.update_daily_data
 trend_analysis_flag = args.trend_analysis
 
-
-
 if update_checklist_flag:
 
     kiwoom = init_kiwoom()
@@ -47,6 +43,13 @@ if update_checklist_flag:
     
 
 if update_daily_data_flag:
+    lastest_checklist = pd.read_csv(CSV_LASTEST_CHECKLIST, encoding='utf-8', dtype=CHECKLIST_DTYPE)
+    today_candidates = lastest_checklist[lastest_checklist['일봉최종수정일'] != int(TODAY)]
+    today_candidates = today_candidates[['시장명', '종목명', '종목코드']]
+    kospi_not_yet = list(today_candidates[today_candidates['시장명'] == 'kospi']['종목코드'].values)
+    kosdaq_not_yet = list(today_candidates[today_candidates['시장명'] == 'kosdaq']['종목코드'].values)
+    kospi_cnt_not_yet = len(kospi_not_yet)
+    kosdaq_cnt_not_yet = len(kosdaq_not_yet)
 
     kiwoom = init_kiwoom()
     collect_daily_data = CollectDailyData(kiwoom)
