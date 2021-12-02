@@ -74,8 +74,6 @@ STOCK_ITEM_DTYPE = {
     '일자' : '날짜'
 }
 
-API_COUNT = 0
-
 kospi_code_list_we_have = [i[:-4] for i in os.listdir(DIR_KOSPI_DAILY) if i.endswith('.csv')]
 kosdaq_code_list_we_have = [i[:-4] for i in os.listdir(DIR_KOSDAQ_DAILY) if i.endswith('.csv')]
 total_code_list_we_have = kospi_code_list_we_have + kosdaq_code_list_we_have
