@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from pykiwoom.kiwoom import *
 from config.setting import *
+from config.setting import API_COUNT
 from datetime import datetime
 import shutil
 
@@ -28,8 +29,13 @@ def get_stock_trade_data_until_now(kiwoom, code, name, today, STOCK_ITEM_DTYPE, 
     
     return recent_df
 class CollectDailyData:
-    def __init__(self, kiwoom):
+    def __init__(self, 
+                kiwoom,
+                kospi_cnt_not_yet,
+                kosdaq_cnt_not_yet):
         self.kiwoom = kiwoom
+        self.kospi_cnt_not_yet = kospi_cnt_not_yet
+        self.kosdaq_cnt_not_yet = kosdaq_cnt_not_yet
 
 
     def check_df(self, old, new):
