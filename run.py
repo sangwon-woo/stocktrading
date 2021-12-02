@@ -5,7 +5,7 @@ import time
 from collector.update_checklist import *
 from collector.update_daily_data import CollectDailyData
 from pykiwoom.kiwoom import Kiwoom
-from config.setting import API_COUNT
+from config.api_count import API_COUNT as api
 
 
 def login_success(kiwoom):
