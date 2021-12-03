@@ -68,8 +68,6 @@ if update_daily_data_flag:
 
             kiwoom = init_kiwoom()
 
-            kospi_code_list_until_now = kiwoom.GetCodeListByMarket('0')
-            kosdaq_code_list_until_now = kiwoom.GetCodeListByMarket('10')
 
             collect_daily_data = CollectDailyData(kiwoom,
                                                 API_COUNT,
@@ -78,6 +76,8 @@ if update_daily_data_flag:
                                                 kospi_cnt_not_yet,
                                                 kosdaq_cnt_not_yet)
 
+            kospi_code_list_until_now = collect_daily_data.kiwoom.GetCodeListByMarket('0')
+            kosdaq_code_list_until_now = collect_daily_data.kiwoom.GetCodeListByMarket('10')
 
             ret, today_checklist = collect_daily_data.iter_kospi(today_checklist, kospi_code_list_until_now)
             today_checklist.to_csv(CSV_TODAY_CHECKLIST, encoding='utf-8', index=None)
@@ -85,8 +85,7 @@ if update_daily_data_flag:
             if ret == 'api_limit':
                 print('API LIMIT!')
                 API_COUNT = 0
-                del kiwoom
-                del collect_daily_data
+                
                 break
             elif ret == 'kospi_complete':
                 print('코스피 목록 완료')
@@ -99,13 +98,15 @@ if update_daily_data_flag:
             if ret == 'api_limit':
                 print('API LIMIT!')
                 API_COUNT = 0
-                del kiwoom
-                del collect_daily_data
                 break
             elif ret == 'kosdaq_complete':
                 print('코스닥 목록 완료')   
                 kosdaq_flag == True
-        
+                break
+
+        del kiwoom
+        del collect_daily_data
+        print(kospi_flag, kosdaq_flag)
         if kospi_flag and kosdaq_flag:
             break
 
