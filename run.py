@@ -101,7 +101,7 @@ if update_daily_data_flag:
                 break
             elif ret == 'kosdaq_complete':
                 print('코스닥 목록 완료')   
-                kosdaq_flag == True
+                kosdaq_flag = True
                 break
 
         del kiwoom
