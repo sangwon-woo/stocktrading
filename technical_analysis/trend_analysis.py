@@ -1,6 +1,7 @@
 import time
 import pandas as pd
 from config.setting import *
+import multiprocessing as mp
 
 def get_trend_analysis(df, days):
     
@@ -124,8 +125,10 @@ def append_trend_analysis(total_df, market):
     time.sleep(2)
 
 def run_trend_analysis():
+    
     total_kospi_df = get_total_df('kospi') if not os.path.isfile(ARR_KOSPI_TOTAL_DATA) else pd.read_feather(ARR_KOSPI_TOTAL_DATA)
-    append_trend_analysis(total_kospi_df, 'kospi')
+    with mp.Pool(os.cpu_count()) as p:
+        append_trend_analysis(total_kospi_df, 'kospi')
 
     total_kosdaq_df = get_total_df('kosdaq') if not os.path.isfile(ARR_KOSDAQ_TOTAL_DATA) else pd.read_feather(ARR_KOSDAQ_TOTAL_DATA)
     append_trend_analysis(total_kosdaq_df, 'kosdaq')
