@@ -5,12 +5,12 @@ import pandas as pd
 import configparser
 
 config = configparser.ConfigParser()
-config.read('config/config.ini', encoding='utf-8')
-USER_ID = config.get('KIWOOM', 'USER_ID')
-USER_NAME = config.get('KIWOOM', 'USER_NAME')
-REAL_ACCOUNT = config.get('KIWOOM', 'REAL_ACCOUNT')
-SIMULATED_ACCOUNT = config.get('KIWOOM', 'SIMULATED_ACCOUNT')
-PASSWORD = config.get('KIWOOM', 'PASSWORD')
+# config.read('config/config.ini', encoding='utf-8')
+# USER_ID = config.get('KIWOOM', 'USER_ID')
+# USER_NAME = config.get('KIWOOM', 'USER_NAME')
+# REAL_ACCOUNT = config.get('KIWOOM', 'REAL_ACCOUNT')
+# SIMULATED_ACCOUNT = config.get('KIWOOM', 'SIMULATED_ACCOUNT')
+# PASSWORD = config.get('KIWOOM', 'PASSWORD')
 
 def get_today(today):
     today_weekday = today.weekday()
