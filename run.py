@@ -117,4 +117,4 @@ if trend_analysis_flag:
     start = time.time()
     os.system('C:\\Users\\pacific\\miniconda3\\envs\\py39_64bits\\python.exe -c "import technical_analysis.trend_analysis as t; t.run_trend_analysis()"')
     end = time.time()
-    print(f'총 걸린 시간 : {(end-start) / 60:.2f}분')
+    print(f'총 걸린 시간 : {(end-start) / 60:.2f}분') 
