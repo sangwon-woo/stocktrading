@@ -302,7 +302,6 @@ class CollectDailyData:
                     self.move_stock_data_to_delisting(code, file_dir)
 
                     continue
-                
                 else:
                     print(f'현재 코스닥에서 거래 안되므로 상장폐지 폴더로 이동', end=' ')
                     self.move_stock_data_to_delisting(code, file_dir)
