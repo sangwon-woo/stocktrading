@@ -215,6 +215,9 @@ class CollectDailyData:
                 if code in kospi_code_list_until_now:
                     print(f'현재까지 코스피에서 거래중이지만 새로운 데이터가 없으므로 상장폐지 폴더로 이동', end=' ')
                     self.move_stock_data_to_delisting(code, file_dir)
+
+                    continue
+
                 else:
                     print(f'현재 코스피에서 거래 안되므로 상장폐지 폴더로 이동', end=' ')
                     self.move_stock_data_to_delisting(code, file_dir)
@@ -297,6 +300,9 @@ class CollectDailyData:
                 if code in kosdaq_code_list_until_now:
                     print(f'현재까지 코스닥에서 거래중이지만 새로운 데이터가 없으므로 상장폐지 폴더로 이동', end=' ')
                     self.move_stock_data_to_delisting(code, file_dir)
+
+                    continue
+                
                 else:
                     print(f'현재 코스닥에서 거래 안되므로 상장폐지 폴더로 이동', end=' ')
                     self.move_stock_data_to_delisting(code, file_dir)
