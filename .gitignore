@@ -140,3 +140,4 @@ stock_data_*/*
 Glossary.xlsx
 config.ini
 *.arrx
+tmp/*
