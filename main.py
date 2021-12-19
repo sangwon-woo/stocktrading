@@ -23,12 +23,7 @@ def get_today(today):
 TODAY = get_today(datetime.today())
 
 
-CSV_KOSPI_TREND_ANALYSIS = PWD + f'\\data\\trend_analysis\\kospi_trend_analysis_{TODAY}.csv'
-CSV_KOSDAQ_TREND_ANALYSIS = PWD + f'\\data\\trend_analysis\\kosdaq_trend_analysis_{TODAY}.csv'
-
-def append_trend_analysis(df, market, queue, process_name):
-    
-    save_dir = CSV_KOSPI_TREND_ANALYSIS if market == 'kospi' else CSV_KOSDAQ_TREND_ANALYSIS
+def append_trend_analysis(df, market, process_name):
     
     trend_df = pd.DataFrame()
 
@@ -59,7 +54,7 @@ def append_trend_analysis(df, market, queue, process_name):
         
         print(f'{current_process().name} : {code} 완료')
 
-    trend_df.to_feather(f'{process_name}.arr', index=None, encoding='utf-8')
+    trend_df.to_feather(f'tmp/{market}_{process_name}_{TODAY}.arr')
 
     print(f'{process_name} has complete its work')
 
@@ -144,28 +139,49 @@ def get_partial_df(df, cpu_count):
         start = end + 1
 
 if __name__ == '__main__':
-    total_kospi_df = pd.read_feather('total_kospi_data_20211214.arrx')
-    # total_kosdaq_df = pd.read_feather('total_kosdaq_data_20211214.arrx')
 
     # kospi 처리
+    total_kospi_df = pd.read_feather('total_kospi_data_20211214.arrx')
     processes = []
-    queue = Queue()
     
     for i, df in enumerate(get_partial_df(total_kospi_df, os.cpu_count())):
         process_name = f'Subprocess #{i+1}'
-        proc = Process(name=process_name, target=append_trend_analysis, args=(df, 'kospi', queue, process_name))
+        proc = Process(name=process_name, target=append_trend_analysis, args=(df, 'kospi', process_name))
         processes.append(proc)
         proc.start()
 
     for proc in processes:
         proc.join()
-
+ 
     total_df = pd.DataFrame()
 
-    while not queue.empty():
-        item = queue.get()
-        print(item.head())
-        total_df = total_df.append(item)
+    arrx_list = os.listdir('tmp/')
+    for f in arrx_list:
+        tdf = pd.read_feather(f'tmp/{f}')
+        total_df = total_df.append(tdf, ignore_index=True)
+    
+    os.removedirs('tmp/')
+
+    total_df.to_feather('total_df.arr')
 
     # kosdaq 처리
+    total_kosdaq_df = pd.read_feather('total_kosdaq_data_20211214.arrx')
     processes = []
+
+    for i, df in enumerate(get_partial_df(total_kosdaq_df, os.cpu_count())):
+        process_name = f'Subprocess #{i+1}'
+        proc = Process(name=process_name, target=append_trend_analysis, args=(df, 'kosdaq', process_name))
+        processes.append(proc)
+        proc.start()
+
+    for proc in processes:
+        proc.join()
+ 
+    total_df = pd.DataFrame()
+
+    arrx_list = os.listdir('tmp/')
+    for f in arrx_list:
+        tdf = pd.read_feather(f'tmp/{f}')
+        total_df = total_df.append(tdf, ignore_index=True)
+    
+    os.removedirs('tmp/')
