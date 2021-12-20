@@ -5,7 +5,6 @@ from datetime import timedelta, datetime
 from multiprocessing import Process, Queue, current_process
 
 PWD = os.getcwd()
-
 def get_today(today):
     today_weekday = today.weekday()
     today_hour = today.hour
@@ -21,6 +20,8 @@ def get_today(today):
         return (today - timedelta(days=1)).date().strftime("%Y%m%d")
 
 TODAY = get_today(datetime.today())
+ARR_KOSPI_TOTAL_DATA = PWD + f'\\data\\total_kospi_data_{TODAY}.arrx'
+ARR_KOSDAQ_TOTAL_DATA = PWD + f'\\data\\total_kosdaq_data_{TODAY}.arrx'
 
 
 def append_trend_analysis(df, market, process_name):
