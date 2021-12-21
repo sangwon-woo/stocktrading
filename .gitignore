@@ -136,7 +136,7 @@ jupyter/
 DBconfig.py
 stock_data_*/*
 *.csv
-/data/*
+data/*
 Glossary.xlsx
 config.ini
 *.arrx
