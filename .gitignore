@@ -140,5 +140,5 @@ data/*
 Glossary.xlsx
 config.ini
 *.arrx
-tmp/*
+*/tmp/*
 *.arr
