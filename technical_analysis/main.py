@@ -1,9 +1,10 @@
 import os
 import random
 import pandas as pd
+import numpy as np
 import time
 from datetime import timedelta, datetime
-from multiprocessing import Process, Queue, current_process, process
+from multiprocessing import Process
 
 
 PWD = os.getcwd()
@@ -22,10 +23,25 @@ def get_today(today):
         return (today - timedelta(days=1)).date().strftime("%Y%m%d")
 
 TODAY = get_today(datetime.today())
+
+DIR_KOSPI_DAILY = PWD + '\\data\\kospi_daily'
+DIR_KOSDAQ_DAILY = PWD + '\\data\\kosdaq_daily'
 ARR_KOSPI_TOTAL_DATA = PWD + f'\\data\\total_kospi_data_{TODAY}.arr'
 ARR_KOSDAQ_TOTAL_DATA = PWD + f'\\data\\total_kosdaq_data_{TODAY}.arr'
 CSV_KOSPI_TREND_ANALYSIS = PWD + f'\\data\\trend_analysis\\kospi_trend_analysis_{TODAY}.csv'
 CSV_KOSDAQ_TREND_ANALYSIS = PWD + f'\\data\\trend_analysis\\kosdaq_trend_analysis_{TODAY}.csv'
+kospi_code_list_we_have = [i[:-4] for i in os.listdir(DIR_KOSPI_DAILY) if i.endswith('.csv')]
+kosdaq_code_list_we_have = [i[:-4] for i in os.listdir(DIR_KOSDAQ_DAILY) if i.endswith('.csv')]
+
+TRADEDATA_DTYPE = {
+    '종목코드' : 'category',
+    '종목명' : 'category',
+    '시가' : np.uint32,
+    '고가' : np.uint32,
+    '저가' : np.uint32,
+    '종가' : np.uint32,
+    '거래량' : np.uint32
+}
 
 def append_trend_analysis(df, market, process_name):
     
@@ -42,12 +58,12 @@ def append_trend_analysis(df, market, process_name):
         
         for days in range(5, 121):
             if nrows < days:
-                print(f'{current_process().name} : 총 데이터 수가 {days}일 보다 적음, {code} 분석 종료', end=' ')
+                print(f'{process_name} : 총 데이터 수가 {days}일 보다 적음, {code} 분석 종료', end=' ')
                 break
                 
             temp_df = code_df.loc[:days-1, :]
             if temp_df[temp_df['거래량'] == 0].shape[0]:
-                print(f'{current_process().name} : {days}일 내에 거래량이 없는 종목이라서 {code} 분석 종료', end=' ')
+                print(f'{process_name} : {days}일 내에 거래량이 없는 종목이라서 {code} 분석 종료', end=' ')
                 break
                 
             tdf = get_trend_analysis(temp_df, days)
@@ -56,7 +72,7 @@ def append_trend_analysis(df, market, process_name):
 
         trend_df = trend_df.append(return_df, ignore_index=True)
         
-        print(f'{current_process().name} : {code} 완료')
+        print(f'{process_name} : {code} 완료')
 
     trend_df.to_feather(f'tmp/{market}_{process_name}_{TODAY}.arr')
 
@@ -126,7 +142,7 @@ def get_trend_analysis(df, days):
     return df.iloc[-1, [1, 2, 19, 15, 17, 18]]
 
 def get_partial_df(df, cpu_count):
-    codes = df['종목코드'].unique().to_list()
+    codes = df['종목코드'].unique().tolist()
     random.shuffle(codes)
     codes_per_process = len(codes) // cpu_count
 
@@ -141,6 +157,23 @@ def get_partial_df(df, cpu_count):
         yield sub_df
 
         start = end + 1
+
+def get_partial_list(code_list, cpu_count):
+    code_cnt = len(code_list)
+    idx = code_cnt // cpu_count
+    random.shuffle(code_list)
+
+    start = 0
+    end = idx + 1
+    for i in range(cpu_count):
+        tmp_list = code_list[start:end]
+        yield tmp_list
+
+        start = end
+        end += (idx + 1)
+
+        if end > code_cnt:
+            end = code_cnt
 
 def run_trend_analysis(market):
     assert market in ['kospi', 'kosdaq'], 'kospi, kosdaq 중 하나를 선택하시오.'
@@ -175,10 +208,61 @@ def run_trend_analysis(market):
     delta = time.time() - s
     print(f'{market} 추세 분석 완료, 소요 시간 : {delta:.2f}초')
 
+def merge_data(code_list, code_dir, process_name):
+    total_df = pd.DataFrame()
+    code_cnt = len(code_list)
+
+    for i, code in enumerate(code_list):
+        tmp_df = pd.read_csv(code_dir + f'\\{code}.csv', encoding='utf-8', dtype=TRADEDATA_DTYPE)
+        total_df = total_df.append(tmp_df, ignore_index=True)
+
+        print(f'{process_name} : {i+1}/{code_cnt}')
+
+    total_df['날짜'] = pd.to_datetime(total_df['날짜'])
+    total_df['종목코드'] = total_df['종목코드'].astype('category')
+    total_df['종목명'] = total_df['종목명'].astype('category')
+    total_df = total_df.sort_values(by=['종목코드', '날짜'], ascending=[True, False]).reset_index(drop=True)
+
+    total_df.to_feather(f'tmp/{process_name}_{TODAY}.arr')
+
+    print(f'{process_name} has complete its work')
+
+
 def make_arr_file(market):
-    pass
+    s = time.time()
+    code_list = kospi_code_list_we_have if market == 'kospi' else kosdaq_code_list_we_have
+    code_dir = DIR_KOSPI_DAILY if market == 'kospi' else DIR_KOSDAQ_DAILY
+    total_df = pd.DataFrame()
+
+    processes = []
+
+    for i, lst in enumerate(get_partial_list(code_list, os.cpu_count())):
+        process_name = f'Subprocess #{i+1}'
+        proc = Process(name=process_name, target=merge_data, args=(lst, code_dir, process_name))
+        processes.append(proc)
+        proc.start()
+
+    for proc in processes:
+        proc.join()
+
+    tmp_arr = os.listdir('tmp/')
+    for arr in tmp_arr:
+        assert arr.endswith('.arr'), 'feather 형식이 아닙니다.'
+
+        tmp_df = pd.read_feather(f'tmp/{arr}')
+        total_df = total_df.append(tmp_df, ignore_index=True)
+        os.remove(f'tmp/{arr}')
+
+    save_dir = ARR_KOSPI_TOTAL_DATA if market == 'kospi' else ARR_KOSDAQ_TOTAL_DATA
+
+    
+    delta = time.time() - s
+    print(f'{market} 데이터 머지 완료, 소요 시간 : {delta:.2f}초')
+
+    total_df.to_feather(save_dir)
 
 if __name__ == '__main__':
+    s = time.time()
     # kospi 처리
     make_arr_file('kospi')
     run_trend_analysis('kospi')
@@ -186,3 +270,5 @@ if __name__ == '__main__':
     # kosdaq 처리
     make_arr_file('kosdaq')
     run_trend_analysis('kosdaq')
+    
+    print(f'총 걸린 시간 : {time.time()-s:.2f}초')
