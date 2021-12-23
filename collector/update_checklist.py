@@ -45,8 +45,10 @@ class CheckList:
         self.today_checklist = self.today_checklist.assign(일봉최종수정일=0)
         self.today_checklist = self.today_checklist.assign(일봉최초날짜=0)
         self.today_checklist = self.today_checklist.assign(일봉최근날짜=0)
-        self.today_checklist = self.today_checklist.assign(분봉관리여부=False)
-        self.today_checklist = self.today_checklist.assign(분봉최종수정일=0)
+        # self.today_checklist = self.today_checklist.assign(분봉관리여부=False)
+        # self.today_checklist = self.today_checklist.assign(분봉최종수정일=0)
+        # self.today_checklist = self.today_checklist.assign(분봉최초날짜=0)
+        # self.today_checklist = self.today_checklist.assign(분봉최근날짜=0)
 
 
     def iter_checklist(self):
