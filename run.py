@@ -6,7 +6,7 @@ from collector.update_checklist import *
 from collector.update_daily_data import CollectDailyData
 from pykiwoom.kiwoom import Kiwoom
 from config.setting import *
-
+ 
 API_COUNT = 0
 
 def login_success(kiwoom):
@@ -115,6 +115,6 @@ if update_daily_data_flag:
 
 if trend_analysis_flag:
     start = time.time()
-    os.system('C:\\Users\\pacific\\miniconda3\\envs\\py39_64bits\\python.exe -c "import technical_analysis.trend_analysis as t; t.run_trend_analysis()"')
+    os.system('C:\\Users\\pacific\\miniconda3\\envs\\py39_64bits\\python.exe -m technical_analysis.main')
     end = time.time()
     print(f'총 걸린 시간 : {(end-start) / 60:.2f}분') 
