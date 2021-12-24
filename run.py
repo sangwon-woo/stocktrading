@@ -31,9 +31,9 @@ parser.add_argument('--trend-analysis', '-t', type=bool, default=False, help='ru
 
 args = parser.parse_args()
 
-update_checklist_flag = args.update_checklist
-update_daily_data_flag = args.update_daily_data
-trend_analysis_flag = args.trend_analysis
+update_checklist_flag = True if args.update_checklist == 't' else False
+update_daily_data_flag = True if args.update_daily_data == 't' else False
+trend_analysis_flag = True if args.trend_analysis == 't' else False
 
 if update_checklist_flag:
 
