@@ -1,6 +1,7 @@
 import argparse
 import os
 import time
+import multiprocessing as mp
 
 from collector.update_checklist import *
 from collector.update_daily_data import CollectDailyData
