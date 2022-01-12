@@ -94,6 +94,7 @@ def update_daily_data(API_COUNT):
         print('코스닥 목록 완료')   
 
 if __name__ == '__main__':
+    s = time.time()
     if update_checklist_flag:
         proc = mp.Process(target=set_checklist, args=(API_COUNT,), name='UPDATE_CHECKLIST')
         proc.start()
@@ -117,3 +118,5 @@ if __name__ == '__main__':
         os.system('C:\\Users\\pacific\\miniconda3\\envs\\py39_64bits\\python.exe -m technical_analysis.trend_analysis')
         end = time.time()
         print(f'총 걸린 시간 : {(end-start) / 60:.2f}분') 
+    e = time.time()
+    print(e-s)
