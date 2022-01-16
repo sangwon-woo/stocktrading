@@ -8,3 +8,15 @@
 그리고 매수할 때는 반드시 손절 포인트를 잡고 들어가야 한다. 
 '''
 
+class RiskManagement:
+    def __init__(self) -> None:
+        self.total_capital = 0
+        self.risk_percentage = 0
+
+    def set_total_capital(self, total_capital):
+        self.total_capital = total_capital
+
+    def set_risk_percentage(self, risk_percentage):
+        self.risk_percentage = risk_percentage
+
+    
