@@ -115,7 +115,7 @@ if __name__ == '__main__':
 
     if trend_analysis_flag:
         start = time.time()
-        os.system('C:\\Users\\pacific\\miniconda3\\envs\\py39_64bits\\python.exe -m technical_analysis.trend_analysis')
+        os.system('C:\\Users\\pacific\\miniconda3\\envs\\pandas\\python.exe -m technical_analysis.trend_analysis')
         end = time.time()
         print(f'총 걸린 시간 : {(end-start) / 60:.2f}분') 
     e = time.time()
