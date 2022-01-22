@@ -13,7 +13,6 @@ class RiskManagement:
         self.total_asset = 0
         self.risk_percentage = 0
 
-
     def set_total_asset(self, total_asset):
         self.total_asset = total_asset
 
